@@ -140,10 +140,22 @@ impl StrongholdManager {
         Ok(value)
     }
 
+    pub fn get_named(&self, key: &str) -> anyhow::Result<Option<Vec<u8>>> {
+        let value = self.client.store().get(key.as_bytes())?;
+
+        Ok(value)
+    }
+
     pub fn insert(&self, key: Uuid, value: Vec<u8>) -> anyhow::Result<()> {
         self.client
             .store()
             .insert(key.to_string().as_bytes().to_vec(), value, None)?;
+
+        self.commit()
+    }
+
+    pub fn insert_named(&self, key: &str, value: Vec<u8>) -> anyhow::Result<()> {
+        self.client.store().insert(key.as_bytes().to_vec(), value, None)?;
 
         self.commit()
     }
@@ -155,6 +167,12 @@ impl StrongholdManager {
         let mut keys = self.client.store().keys()?;
         keys.sort();
         keys.iter()
+            .filter(|key| {
+                std::str::from_utf8(key)
+                    .ok()
+                    .and_then(|key| Uuid::parse_str(key).ok())
+                    .is_some()
+            })
             .map(|key| {
                 client
                     .store()

@@ -1,0 +1,10 @@
+.git
+.github
+.vscode
+target
+node_modules
+unime/node_modules
+debug
+*.log
+*.tmp
+.env

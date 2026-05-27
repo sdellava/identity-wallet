@@ -1,6 +1,7 @@
 use crate::state::actions::ActionTrait;
 use crate::state::qr_code::reducers::read_authorization_request::read_authorization_request;
 use crate::state::qr_code::reducers::read_credential_offer::read_credential_offer;
+use crate::state::qr_code::reducers::read_prepared_iota_transaction::read_prepared_iota_transaction;
 use crate::{reducer, state::Reducer};
 
 use serde::{Deserialize, Serialize};
@@ -16,6 +17,10 @@ pub struct QrCodeScanned {
 #[typetag::serde(name = "[QR Code] Scanned")]
 impl ActionTrait for QrCodeScanned {
     fn reducers<'a>(&self) -> Vec<Reducer<'a>> {
-        vec![reducer!(read_authorization_request), reducer!(read_credential_offer)]
+        vec![
+            reducer!(read_prepared_iota_transaction),
+            reducer!(read_authorization_request),
+            reducer!(read_credential_offer),
+        ]
     }
 }

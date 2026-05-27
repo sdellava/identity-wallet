@@ -43,6 +43,13 @@ const empty_state: AppState = {
   verified_data: {
     email_verification: null,
   },
+  iota_wallet: {
+    address: null,
+    did: null,
+    identity_controller_cap: null,
+    last_transaction_digest: null,
+    last_error: null,
+  },
   show_dev_mode_setting: false,
   is_unlocked: false,
   dev_mode: 'Off',

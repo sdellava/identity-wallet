@@ -77,6 +77,9 @@ mod bindings {
         },
         dev_mode::actions::{dev_profile::DevProfile, show_setting::ShowDevModeSetting},
         did::actions::{set_preferred_keytype::SetPreferredKeyType, set_preferred_method::SetPreferredDidMethod},
+        iota_wallet::actions::{
+            create_or_load_wallet::CreateOrLoadIotaWallet, sign_prepared_transaction::SignPreparedIotaTransaction,
+        },
         profile_settings::actions::{
             create_new::CreateNew, enable_biometrics::EnableBiometrics, set_locale::SetLocale,
             update_profile_settings::UpdateProfileSettings, update_sorting_preference::UpdateSortingPreference,
@@ -183,5 +186,9 @@ mod bindings {
         ResetEmailVerification,
         #[serde(rename = "[Credential] Self Issue")]
         SelfIssueCredential { payload: SelfIssueCredential },
+        #[serde(rename = "[IOTA Wallet] Create or load")]
+        CreateOrLoadIotaWallet { payload: CreateOrLoadIotaWallet },
+        #[serde(rename = "[IOTA Wallet] Sign prepared transaction")]
+        SignPreparedIotaTransaction { payload: SignPreparedIotaTransaction },
     }
 }

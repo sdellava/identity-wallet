@@ -40,6 +40,48 @@
 
 <div class="flex flex-col space-y-[15px] bg-silver px-4 py-5 dark:bg-navy">
   <div class="flex flex-col space-y-[10px]">
+    <p class="text-[14px]/[22px] font-medium text-slate-500 dark:text-slate-300">IOTA testnet wallet</p>
+    <div class="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-600 dark:bg-dark">
+      <div class="flex items-center justify-between gap-3">
+        <p class="text-base font-semibold text-slate-800 dark:text-grey">Transaction signing</p>
+        <button
+          class="rounded-lg bg-primary px-3 py-2 text-[12px]/[16px] font-semibold text-white dark:text-dark"
+          on:click={() => dispatch({ type: '[IOTA Wallet] Create or load', payload: {} })}
+        >
+          Initialize
+        </button>
+      </div>
+      <div class="mt-4 flex flex-col gap-2">
+        <p class="text-[12px]/[18px] font-medium text-slate-500 dark:text-slate-300">Address</p>
+        <p class="font-mono text-[11px]/[16px] break-all text-slate-800 dark:text-grey">
+          {$state.iota_wallet.address ?? 'Not initialized'}
+        </p>
+        {#if $state.iota_wallet.did}
+          <p class="pt-2 text-[12px]/[18px] font-medium text-slate-500 dark:text-slate-300">DID</p>
+          <p class="font-mono text-[11px]/[16px] break-all text-slate-800 dark:text-grey">{$state.iota_wallet.did}</p>
+        {/if}
+        {#if $state.iota_wallet.identity_controller_cap}
+          <p class="pt-2 text-[12px]/[18px] font-medium text-slate-500 dark:text-slate-300">
+            Identity controller cap
+          </p>
+          <p class="font-mono text-[11px]/[16px] break-all text-slate-800 dark:text-grey">
+            {$state.iota_wallet.identity_controller_cap}
+          </p>
+        {/if}
+        {#if $state.iota_wallet.last_transaction_digest}
+          <p class="pt-2 text-[12px]/[18px] font-medium text-slate-500 dark:text-slate-300">Last tx</p>
+          <p class="font-mono text-[11px]/[16px] break-all text-slate-800 dark:text-grey">
+            {$state.iota_wallet.last_transaction_digest}
+          </p>
+        {/if}
+        {#if $state.iota_wallet.last_error}
+          <p class="pt-2 text-[12px]/[18px] font-medium text-rose-500">{$state.iota_wallet.last_error}</p>
+        {/if}
+      </div>
+    </div>
+  </div>
+
+  <div class="flex flex-col space-y-[10px]">
     <p class="text-[14px]/[22px] font-medium text-slate-500 dark:text-slate-300">Available keys</p>
     {#each keys as key}
       <button

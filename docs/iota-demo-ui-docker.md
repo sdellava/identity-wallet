@@ -9,7 +9,8 @@ docker compose -f docker-compose.iota-demo.yml up -d --build
 ```
 
 The demo accepts a wallet address, prepares a tiny IOTA testnet transaction,
-and renders a QR payload that UniMe can scan:
+stores the prepared payload in memory, and renders a QR code containing a short
+`/payload/{id}` URL that UniMe can scan. The payload endpoint returns:
 
 ```json
 {

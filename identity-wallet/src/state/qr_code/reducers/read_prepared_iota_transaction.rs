@@ -33,7 +33,18 @@ pub async fn read_prepared_iota_transaction(state: AppState, action: Action) -> 
         return Ok(state);
     };
 
-    let Ok(qr) = serde_json::from_str::<PreparedIotaTransactionQr>(&scanned.form_urlencoded) else {
+    let qr_content = if is_prepared_iota_transaction_url(&scanned.form_urlencoded) {
+        reqwest::get(&scanned.form_urlencoded)
+            .await
+            .map_err(|e| AppError::Error(format!("Failed to fetch prepared IOTA transaction: {e}")))?
+            .text()
+            .await
+            .map_err(|e| AppError::Error(format!("Failed to read prepared IOTA transaction response: {e}")))?
+    } else {
+        scanned.form_urlencoded
+    };
+
+    let Ok(qr) = serde_json::from_str::<PreparedIotaTransactionQr>(&qr_content) else {
         return Ok(state);
     };
 
@@ -49,4 +60,8 @@ pub async fn read_prepared_iota_transaction(state: AppState, action: Action) -> 
         }),
     )
     .await
+}
+
+fn is_prepared_iota_transaction_url(value: &str) -> bool {
+    (value.starts_with("https://") || value.starts_with("http://")) && value.contains("/payload/")
 }

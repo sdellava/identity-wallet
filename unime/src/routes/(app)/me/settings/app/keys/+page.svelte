@@ -1,129 +1,179 @@
 <script lang="ts">
   import { TopNavBar } from '$lib/components';
   import { dispatch } from '$lib/dispatcher';
-  import { InfoRegularIcon } from '$lib/icons';
   import { state } from '$lib/stores';
 
-  $: preferred_key_type = $state.profile_settings.preferred_key_types.at(0);
+  type IotaNetwork = 'testnet' | 'mainnet';
 
-  type KeyType = 'EdDSA' | 'ES256' | 'ES256K';
+  let selectedNetwork: IotaNetwork = $state.iota_wallet.network ?? 'testnet';
+  let showSeed = false;
 
-  interface Key {
-    type: KeyType;
-    alias?: string;
-    key_id: string; // Corresponds to the `JwkStorage` in `did-manager`
-    enabled: boolean;
+  $: if ($state.iota_wallet.network && $state.iota_wallet.network !== selectedNetwork) {
+    selectedNetwork = $state.iota_wallet.network;
+    showSeed = false;
   }
 
-  const keys: Key[] = [
-    {
-      type: 'EdDSA',
-      key_id: 'ed25519-0',
-      enabled: true,
-    },
-    {
-      type: 'ES256',
-      key_id: 'es256-0',
-      enabled: true,
-    },
-    // NOTE: Although Stronghold contains a key for ES256K, we're not giving the user that option yet since
-    // the Rust library `jsonwebtoken` does not support it (yet) to sign tokens.
-    // {
-    //   type: 'ES256K',
-    //   key_id: 'es256k-0',
-    //   enabled: false,
-    // },
-  ];
+  const loadWallet = (network: IotaNetwork = selectedNetwork) =>
+    dispatch({ type: '[IOTA Wallet] Create or load', payload: { network } });
+
+  const changeNetwork = (network: IotaNetwork) => {
+    selectedNetwork = network;
+    showSeed = false;
+    loadWallet(network);
+  };
+
+  const requestFaucet = () => dispatch({ type: '[IOTA Wallet] Request faucet funds', payload: {} });
+  const publishDid = () => dispatch({ type: '[IOTA Wallet] Publish DID', payload: {} });
 </script>
 
-<TopNavBar on:back={() => history.back()} title={'Manage keys'} class="sticky top-0 z-10" />
+<TopNavBar on:back={() => history.back()} title={'IOTA wallet'} class="sticky top-0 z-10" />
 
-<div class="flex flex-col space-y-[15px] bg-silver px-4 py-5 dark:bg-navy">
-  <div class="flex flex-col space-y-[10px]">
-    <p class="text-[14px]/[22px] font-medium text-slate-500 dark:text-slate-300">IOTA testnet wallet</p>
-    <div class="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-600 dark:bg-dark">
-      <div class="flex items-center justify-between gap-3">
-        <p class="text-base font-semibold text-slate-800 dark:text-grey">Transaction signing</p>
-        <button
-          class="rounded-lg bg-primary px-3 py-2 text-[12px]/[16px] font-semibold text-white dark:text-dark"
-          on:click={() => dispatch({ type: '[IOTA Wallet] Create or load', payload: {} })}
-        >
-          Initialize
-        </button>
+<div class="flex flex-col gap-4 bg-silver px-4 py-5 dark:bg-navy">
+  <section class="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-600 dark:bg-dark">
+    <p class="text-base font-semibold text-slate-800 dark:text-grey">Network</p>
+    <div class="mt-3 grid grid-cols-2 rounded-lg bg-silver p-1 dark:bg-navy">
+      <button
+        class="rounded-md px-3 py-2 text-[12px]/[16px] font-semibold {selectedNetwork === 'testnet'
+          ? 'bg-primary text-white dark:text-dark'
+          : 'text-slate-500 dark:text-slate-300'}"
+        on:click={() => changeNetwork('testnet')}
+      >
+        Testnet
+      </button>
+      <button
+        class="rounded-md px-3 py-2 text-[12px]/[16px] font-semibold {selectedNetwork === 'mainnet'
+          ? 'bg-primary text-white dark:text-dark'
+          : 'text-slate-500 dark:text-slate-300'}"
+        on:click={() => changeNetwork('mainnet')}
+      >
+        Mainnet
+      </button>
+    </div>
+  </section>
+
+  <section class="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-600 dark:bg-dark">
+    <div class="flex items-center justify-between gap-3">
+      <div>
+        <p class="text-base font-semibold text-slate-800 dark:text-grey">Seed and address</p>
+        <p class="text-[12px]/[18px] font-medium text-slate-500 dark:text-slate-300">
+          Create or load the IOTA key stored in this wallet.
+        </p>
       </div>
-      <div class="mt-4 flex flex-col gap-2">
+      <button
+        class="rounded-lg bg-primary px-3 py-2 text-[12px]/[16px] font-semibold text-white dark:text-dark"
+        on:click={() => loadWallet()}
+      >
+        {$state.iota_wallet.address ? 'Reload' : 'Create'}
+      </button>
+    </div>
+
+    <div class="mt-4 flex flex-col gap-3">
+      <div>
         <p class="text-[12px]/[18px] font-medium text-slate-500 dark:text-slate-300">Address</p>
         <p class="font-mono text-[11px]/[16px] break-all text-slate-800 dark:text-grey">
-          {$state.iota_wallet.address ?? 'Not initialized'}
+          {$state.iota_wallet.address ?? 'Not created yet'}
         </p>
-        {#if $state.iota_wallet.did}
-          <p class="pt-2 text-[12px]/[18px] font-medium text-slate-500 dark:text-slate-300">DID</p>
-          <p class="font-mono text-[11px]/[16px] break-all text-slate-800 dark:text-grey">{$state.iota_wallet.did}</p>
-        {/if}
-        {#if $state.iota_wallet.identity_controller_cap}
-          <p class="pt-2 text-[12px]/[18px] font-medium text-slate-500 dark:text-slate-300">
-            Identity controller cap
-          </p>
-          <p class="font-mono text-[11px]/[16px] break-all text-slate-800 dark:text-grey">
-            {$state.iota_wallet.identity_controller_cap}
-          </p>
-        {/if}
-        {#if $state.iota_wallet.last_transaction_digest}
-          <p class="pt-2 text-[12px]/[18px] font-medium text-slate-500 dark:text-slate-300">Last tx</p>
-          <p class="font-mono text-[11px]/[16px] break-all text-slate-800 dark:text-grey">
-            {$state.iota_wallet.last_transaction_digest}
-          </p>
-        {/if}
-        {#if $state.iota_wallet.last_error}
-          <p class="pt-2 text-[12px]/[18px] font-medium text-rose-500">{$state.iota_wallet.last_error}</p>
-        {/if}
       </div>
-    </div>
-  </div>
 
-  <div class="flex flex-col space-y-[10px]">
-    <p class="text-[14px]/[22px] font-medium text-slate-500 dark:text-slate-300">Available keys</p>
-    {#each keys as key}
-      <button
-        class={`rounded-xl border bg-white p-4 disabled:opacity-30 dark:bg-dark ${key.type === preferred_key_type ? 'border-primary ring-1 ring-primary' : 'border-slate-200 dark:border-slate-600'}`}
-        on:click={() => dispatch({ type: '[Keys] Set preferred key type', payload: { key_type: key.type } })}
-        disabled={!key.enabled}
-      >
-        <div class="flex h-7 items-center justify-between">
-          <div class="flex items-center">
-            <p class="text-base font-semibold text-slate-800 dark:text-grey">{key.type}</p>
+      {#if $state.iota_wallet.public_key}
+        <div>
+          <p class="text-[12px]/[18px] font-medium text-slate-500 dark:text-slate-300">Public key</p>
+          <p class="font-mono text-[11px]/[16px] break-all text-slate-800 dark:text-grey">
+            {$state.iota_wallet.public_key}
+          </p>
+        </div>
+      {/if}
+
+      {#if selectedNetwork === 'testnet' && $state.iota_wallet.seed_phrase}
+        <div>
+          <div class="flex items-center justify-between gap-3">
+            <p class="text-[12px]/[18px] font-medium text-slate-500 dark:text-slate-300">Seed phrase</p>
+            <button
+              class="rounded-lg border border-slate-200 px-3 py-1 text-[11px]/[16px] font-semibold text-slate-700 dark:border-slate-600 dark:text-grey"
+              on:click={() => (showSeed = !showSeed)}
+            >
+              {showSeed ? 'Hide' : 'Show'}
+            </button>
           </div>
-          {#if key.type === preferred_key_type}
-            <div class="flex items-center space-x-1 rounded-full bg-ex-blue-2 px-2 py-1 dark:bg-primary">
-              <p class="text-[12px]/[20px] font-medium text-secondary dark:text-dark">preferred</p>
-            </div>
+          {#if showSeed}
+            <p class="mt-2 font-mono text-[11px]/[16px] break-all text-slate-800 dark:text-grey">
+              {$state.iota_wallet.seed_phrase}
+            </p>
           {/if}
         </div>
-        {#if key.key_id}
-          <div class="flex items-center justify-between space-x-4 pt-4">
-            <p class="text-left font-mono text-[11px]/[14px] font-medium break-all text-slate-500 dark:text-slate-300">
-              {key.key_id}
-            </p>
-          </div>
-        {/if}
-      </button>
-    {/each}
-  </div>
-
-  <div class="flex w-full items-center rounded-lg bg-white px-4 py-4 dark:bg-dark">
-    <span class="mr-4 h-6 w-6">
-      <InfoRegularIcon class="h-6 w-6 text-primary" />
-    </span>
-    <div class="flex flex-col">
-      <p class="text-[13px]/[24px] font-medium text-slate-800 dark:text-grey">Developer info</p>
-      <ul class="ml-3 list-disc text-[12px]/[20px] font-medium text-slate-500 dark:text-slate-300">
-        <li>All keys are generated once on profile creation.</li>
-        <li>Only one key per type is currently supported.</li>
-        <li>
-          UniMe will automatically select the key type based on the server capabilities, but respect your preference if
-          there's multiple matches.
-        </li>
-      </ul>
+      {/if}
     </div>
-  </div>
+  </section>
+
+  {#if selectedNetwork === 'testnet'}
+    <section class="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-600 dark:bg-dark">
+      <div class="flex items-center justify-between gap-3">
+        <div>
+          <p class="text-base font-semibold text-slate-800 dark:text-grey">Testnet tokens</p>
+          <p class="text-[12px]/[18px] font-medium text-slate-500 dark:text-slate-300">
+            Request gas from the IOTA testnet faucet for this address.
+          </p>
+        </div>
+        <button
+          class="rounded-lg bg-primary px-3 py-2 text-[12px]/[16px] font-semibold text-white disabled:opacity-40 dark:text-dark"
+          disabled={!$state.iota_wallet.address}
+          on:click={requestFaucet}
+        >
+          Faucet
+        </button>
+      </div>
+      {#if $state.iota_wallet.faucet_status}
+        <p class="mt-3 font-mono text-[11px]/[16px] break-all text-slate-800 dark:text-grey">
+          {$state.iota_wallet.faucet_status}
+        </p>
+      {/if}
+    </section>
+  {/if}
+
+  <section class="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-600 dark:bg-dark">
+    <div class="flex items-center justify-between gap-3">
+      <div>
+        <p class="text-base font-semibold text-slate-800 dark:text-grey">IOTA identity</p>
+        <p class="text-[12px]/[18px] font-medium text-slate-500 dark:text-slate-300">
+          Publish an on-chain DID controlled by this wallet address.
+        </p>
+      </div>
+      <button
+        class="rounded-lg bg-primary px-3 py-2 text-[12px]/[16px] font-semibold text-white disabled:opacity-40 dark:text-dark"
+        disabled={!$state.iota_wallet.address}
+        on:click={publishDid}
+      >
+        Publish
+      </button>
+    </div>
+    {#if $state.iota_wallet.did}
+      <div class="mt-3">
+        <p class="text-[12px]/[18px] font-medium text-slate-500 dark:text-slate-300">DID</p>
+        <p class="font-mono text-[11px]/[16px] break-all text-slate-800 dark:text-grey">{$state.iota_wallet.did}</p>
+      </div>
+    {/if}
+    {#if $state.iota_wallet.identity_controller_cap}
+      <div class="mt-3">
+        <p class="text-[12px]/[18px] font-medium text-slate-500 dark:text-slate-300">Controller cap</p>
+        <p class="font-mono text-[11px]/[16px] break-all text-slate-800 dark:text-grey">
+          {$state.iota_wallet.identity_controller_cap}
+        </p>
+      </div>
+    {/if}
+  </section>
+
+  {#if $state.iota_wallet.last_transaction_digest}
+    <section class="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-600 dark:bg-dark">
+      <p class="text-[12px]/[18px] font-medium text-slate-500 dark:text-slate-300">Last signed transaction</p>
+      <p class="font-mono text-[11px]/[16px] break-all text-slate-800 dark:text-grey">
+        {$state.iota_wallet.last_transaction_digest}
+      </p>
+    </section>
+  {/if}
+
+  {#if $state.iota_wallet.last_error}
+    <p class="rounded-xl bg-white p-4 text-[12px]/[18px] font-medium text-rose-500 dark:bg-dark">
+      {$state.iota_wallet.last_error}
+    </p>
+  {/if}
 </div>

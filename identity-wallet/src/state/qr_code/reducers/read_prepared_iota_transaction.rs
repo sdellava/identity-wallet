@@ -7,6 +7,7 @@ use crate::{
         iota_wallet::{
             actions::sign_prepared_transaction::SignPreparedIotaTransaction,
             reducers::sign_prepared_transaction::sign_prepared_transaction,
+            IotaNetwork,
         },
         qr_code::actions::qrcode_scanned::QrCodeScanned,
         AppState,
@@ -19,6 +20,8 @@ use serde::Deserialize;
 struct PreparedIotaTransactionQr {
     #[serde(rename = "type")]
     kind: String,
+    #[serde(default)]
+    network: IotaNetwork,
     tx_data_bcs_base64: String,
     #[serde(default = "default_submit")]
     submit: bool,
@@ -56,6 +59,7 @@ pub async fn read_prepared_iota_transaction(state: AppState, action: Action) -> 
         state,
         Arc::new(SignPreparedIotaTransaction {
             tx_data_bcs_base64: qr.tx_data_bcs_base64,
+            network: qr.network,
             submit: qr.submit,
         }),
     )

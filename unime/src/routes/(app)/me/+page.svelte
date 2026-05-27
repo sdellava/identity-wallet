@@ -73,6 +73,22 @@
 
   <div class="p-5 pt-0">
     <WelcomeMessage />
+    {#if $state.iota_wallet.did}
+      <button
+        class="mt-4 w-full rounded-xl border border-slate-200 bg-silver p-4 text-left dark:border-slate-600 dark:bg-navy"
+        onclick={() => goto('/me/settings/app/keys')}
+      >
+        <div class="flex items-center justify-between gap-3">
+          <p class="text-[13px]/[18px] font-semibold text-slate-800 dark:text-grey">IOTA Identity</p>
+          <p class="rounded-md bg-primary px-2 py-1 text-[10px]/[14px] font-semibold text-white dark:text-dark">
+            {$state.iota_wallet.network}
+          </p>
+        </div>
+        <p class="mt-2 font-mono text-[11px]/[16px] break-all text-slate-600 dark:text-slate-300">
+          {$state.iota_wallet.did}
+        </p>
+      </button>
+    {/if}
     {#if $state?.user_journey}
       <div class="pt-4">
         <UserJourney />

@@ -78,7 +78,8 @@ mod bindings {
         dev_mode::actions::{dev_profile::DevProfile, show_setting::ShowDevModeSetting},
         did::actions::{set_preferred_keytype::SetPreferredKeyType, set_preferred_method::SetPreferredDidMethod},
         iota_wallet::actions::{
-            create_or_load_wallet::CreateOrLoadIotaWallet, sign_prepared_transaction::SignPreparedIotaTransaction,
+            create_or_load_wallet::CreateOrLoadIotaWallet, publish_did::PublishIotaDid,
+            request_faucet_funds::RequestIotaFaucetFunds, sign_prepared_transaction::SignPreparedIotaTransaction,
         },
         profile_settings::actions::{
             create_new::CreateNew, enable_biometrics::EnableBiometrics, set_locale::SetLocale,
@@ -188,6 +189,10 @@ mod bindings {
         SelfIssueCredential { payload: SelfIssueCredential },
         #[serde(rename = "[IOTA Wallet] Create or load")]
         CreateOrLoadIotaWallet { payload: CreateOrLoadIotaWallet },
+        #[serde(rename = "[IOTA Wallet] Request faucet funds")]
+        RequestIotaFaucetFunds { payload: RequestIotaFaucetFunds },
+        #[serde(rename = "[IOTA Wallet] Publish DID")]
+        PublishIotaDid { payload: PublishIotaDid },
         #[serde(rename = "[IOTA Wallet] Sign prepared transaction")]
         SignPreparedIotaTransaction { payload: SignPreparedIotaTransaction },
     }

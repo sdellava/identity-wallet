@@ -4,7 +4,7 @@ use crate::{
         actions::{listen, Action},
         iota_wallet::{
             actions::sign_prepared_transaction::SignPreparedIotaTransaction,
-            reducers::create_or_load_wallet::load_stored_wallet, IotaWalletState,
+            reducers::create_or_load_wallet::load_stored_wallet, IotaNetwork, IotaWalletState,
         },
         AppState,
     },
@@ -31,6 +31,27 @@ pub async fn sign_prepared_transaction(state: AppState, action: Action) -> Resul
     };
 
     let wallet = load_stored_wallet(&state).await?;
+    if wallet.network != payload.network {
+        return Ok(AppState {
+            iota_wallet: IotaWalletState {
+                network: wallet.network,
+                address: Some(wallet.address),
+                public_key: wallet.public_key,
+                seed_phrase: Some(wallet.mnemonic),
+                did: wallet.did,
+                identity_controller_cap: wallet.identity_controller_cap,
+                faucet_status: state.iota_wallet.faucet_status,
+                last_error: Some(format!(
+                    "Prepared transaction is for {}, but the wallet is set to {}.",
+                    payload.network.as_str(),
+                    wallet.network.as_str()
+                )),
+                ..state.iota_wallet
+            },
+            ..state
+        });
+    }
+
     let mut keystore = InMemKeystore::default();
     let address = keystore
         .import_from_mnemonic(
@@ -52,9 +73,13 @@ pub async fn sign_prepared_transaction(state: AppState, action: Action) -> Resul
     if address != expected_sender || tx_data.sender() != expected_sender {
         return Ok(AppState {
             iota_wallet: IotaWalletState {
+                network: wallet.network,
                 address: Some(wallet.address),
+                public_key: wallet.public_key,
+                seed_phrase: Some(wallet.mnemonic),
                 did: wallet.did,
                 identity_controller_cap: wallet.identity_controller_cap,
+                faucet_status: state.iota_wallet.faucet_status,
                 last_error: Some("Prepared transaction sender does not match this wallet address".to_string()),
                 ..state.iota_wallet
             },
@@ -67,10 +92,16 @@ pub async fn sign_prepared_transaction(state: AppState, action: Action) -> Resul
         .map_err(|e| AppError::Error(format!("Failed to sign IOTA transaction: {e}")))?;
 
     let digest = if payload.submit {
-        let client = IotaClientBuilder::default()
-            .build_testnet()
-            .await
-            .map_err(|e| AppError::Error(format!("Failed to connect to IOTA testnet: {e}")))?;
+        let client = match payload.network {
+            IotaNetwork::Testnet => IotaClientBuilder::default()
+                .build_testnet()
+                .await
+                .map_err(|e| AppError::Error(format!("Failed to connect to IOTA testnet: {e}")))?,
+            IotaNetwork::Mainnet => IotaClientBuilder::default()
+                .build_mainnet()
+                .await
+                .map_err(|e| AppError::Error(format!("Failed to connect to IOTA mainnet: {e}")))?,
+        };
         let response = client
             .quorum_driver_api()
             .execute_transaction_block(
@@ -87,9 +118,13 @@ pub async fn sign_prepared_transaction(state: AppState, action: Action) -> Resul
 
     Ok(AppState {
         iota_wallet: IotaWalletState {
+            network: wallet.network,
             address: Some(wallet.address),
+            public_key: wallet.public_key,
+            seed_phrase: Some(wallet.mnemonic),
             did: wallet.did,
             identity_controller_cap: wallet.identity_controller_cap,
+            faucet_status: state.iota_wallet.faucet_status,
             last_transaction_digest: digest,
             last_error: None,
         },

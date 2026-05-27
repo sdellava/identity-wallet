@@ -44,9 +44,13 @@ const empty_state: AppState = {
     email_verification: null,
   },
   iota_wallet: {
+    network: 'testnet',
     address: null,
+    public_key: null,
+    seed_phrase: null,
     did: null,
     identity_controller_cap: null,
+    faucet_status: null,
     last_transaction_digest: null,
     last_error: null,
   },

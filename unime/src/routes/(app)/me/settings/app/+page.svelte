@@ -57,6 +57,13 @@
       {$LL.SETTINGS.APP.SECURITY.LABEL()}
     </SettingsCaretLink>
 
+    <SettingsCaretLink href="/me/settings/app/keys">
+      {#snippet icon()}
+        <KeyFillIcon class="h-5 w-5 text-primary"></KeyFillIcon>
+      {/snippet}
+      IOTA wallet
+    </SettingsCaretLink>
+
     <!-- <SettingsCaretLink href="#" disabled>
       {#snippet icon()}
         <PasswordFillIcon class="h-5 w-5 text-primary"></PasswordFillIcon>
@@ -109,15 +116,6 @@
             <FilesFillIcon class="h-5 w-5 text-primary"></FilesFillIcon>
           {/snippet}
           DID management
-        </SettingsCaretLink>
-      </div>
-
-      <div in:fade={{ duration: 200, delay: 50 }} out:fade={{ duration: 200 }}>
-        <SettingsCaretLink href="/me/settings/app/keys">
-          {#snippet icon()}
-            <KeyFillIcon class="h-5 w-5 text-primary"></KeyFillIcon>
-          {/snippet}
-          Key management
         </SettingsCaretLink>
       </div>
 

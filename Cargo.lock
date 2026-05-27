@@ -5524,6 +5524,7 @@ dependencies = [
  "rustls 0.23.31",
  "rustls-platform-verifier 0.6.1",
  "sd-jwt-payload",
+ "secret-storage",
  "serde",
  "serde_json",
  "serde_with 3.14.0",

@@ -1,4 +1,4 @@
-use crate::state::actions::ActionTrait;
+use crate::state::{actions::ActionTrait, iota_wallet::IotaNetwork};
 use crate::state::iota_wallet::reducers::sign_prepared_transaction::sign_prepared_transaction;
 use crate::{reducer, state::Reducer};
 
@@ -9,6 +9,8 @@ use ts_rs::TS;
 #[ts(export, export_to = "bindings/actions/SignPreparedIotaTransaction.ts")]
 pub struct SignPreparedIotaTransaction {
     pub tx_data_bcs_base64: String,
+    #[serde(default)]
+    pub network: IotaNetwork,
     #[serde(default)]
     pub submit: bool,
 }

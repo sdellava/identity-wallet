@@ -3,6 +3,8 @@
   "scripts": {
     "build": "pnpm --filter=unime build",
     "check": "pnpm --filter=unime check",
+    "iota-demo:build": "tsc -p scripts/iota-demo/tsconfig.json",
+    "iota-demo:start": "node dist/iota-demo/server.js",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
     "lint": "pnpm --filter=unime lint",
@@ -11,9 +13,15 @@
   },
   "devDependencies": {
     "@ianvs/prettier-plugin-sort-imports": "^4.7.1",
+    "@types/node": "^22.19.19",
+    "@types/qrcode": "^1.5.6",
     "prettier": "^3.8.1",
     "prettier-plugin-svelte": "^3.5.0",
     "prettier-plugin-tailwindcss": "^0.7.2"
   },
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "@iota/iota-sdk": "^1.14.0",
+    "qrcode": "^1.5.4"
+  }
 }

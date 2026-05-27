@@ -7,10 +7,23 @@ settings:
 importers:
 
   .:
+    dependencies:
+      '@iota/iota-sdk':
+        specifier: ^1.14.0
+        version: 1.14.0(typescript@5.9.3)
+      qrcode:
+        specifier: ^1.5.4
+        version: 1.5.4
     devDependencies:
       '@ianvs/prettier-plugin-sort-imports':
         specifier: ^4.7.1
         version: 4.7.1(prettier@3.8.1)
+      '@types/node':
+        specifier: ^22.19.19
+        version: 22.19.19
+      '@types/qrcode':
+        specifier: ^1.5.6
+        version: 1.5.6
       prettier:
         specifier: ^3.8.1
         version: 3.8.1
@@ -103,7 +116,7 @@ importers:
         version: 6.9.1
       '@testing-library/svelte':
         specifier: ^5.3.1
-        version: 5.3.1(svelte@5.53.6)(vite@7.3.1(@types/node@25.3.2)(jiti@2.6.1)(lightningcss@1.31.1)(yaml@2.5.0))(vitest@4.0.18(@types/node@25.3.2)(jiti@2.6.1)(jsdom@27.4.0)(lightningcss@1.31.1)(yaml@2.5.0))
+        version: 5.3.1(svelte@5.53.6)(vite@7.3.1(@types/node@25.3.2)(jiti@2.6.1)(lightningcss@1.31.1)(yaml@2.5.0))(vitest@4.0.18(@types/node@25.3.2)(jiti@2.6.1)(jsdom@27.4.0(@noble/hashes@1.8.0))(lightningcss@1.31.1)(yaml@2.5.0))
       '@types/eslint':
         specifier: ^9.6.1
         version: 9.6.1
@@ -115,7 +128,7 @@ importers:
         version: 1.5.6
       '@vitest/coverage-v8':
         specifier: ^4.0.18
-        version: 4.0.18(vitest@4.0.18(@types/node@25.3.2)(jiti@2.6.1)(jsdom@27.4.0)(lightningcss@1.31.1)(yaml@2.5.0))
+        version: 4.0.18(vitest@4.0.18(@types/node@25.3.2)(jiti@2.6.1)(jsdom@27.4.0(@noble/hashes@1.8.0))(lightningcss@1.31.1)(yaml@2.5.0))
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -133,7 +146,7 @@ importers:
         version: 16.5.0
       jsdom:
         specifier: ^27.4.0
-        version: 27.4.0
+        version: 27.4.0(@noble/hashes@1.8.0)
       just-extend:
         specifier: ^6.2.0
         version: 6.2.0
@@ -187,12 +200,26 @@ importers:
         version: 7.3.1(@types/node@25.3.2)(jiti@2.6.1)(lightningcss@1.31.1)(yaml@2.5.0)
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@25.3.2)(jiti@2.6.1)(jsdom@27.4.0)(lightningcss@1.31.1)(yaml@2.5.0)
+        version: 4.0.18(@types/node@25.3.2)(jiti@2.6.1)(jsdom@27.4.0(@noble/hashes@1.8.0))(lightningcss@1.31.1)(yaml@2.5.0)
       zod:
         specifier: ^4.3.6
         version: 4.3.6
 
 packages:
+
+  '@0no-co/graphql.web@1.2.0':
+    resolution: {integrity: sha512-/1iHy9TTr63gE1YcR5idjx8UREz1s0kFhydf3bBLCXyqjhkIc6igAzTOx3zPifCwFR87tsh/4Pa9cNts6d2otw==}
+    peerDependencies:
+      graphql: ^14.0.0 || ^15.0.0 || ^16.0.0
+    peerDependenciesMeta:
+      graphql:
+        optional: true
+
+  '@0no-co/graphqlsp@1.15.4':
+    resolution: {integrity: sha512-Nt1DVHcZ08lKRKwhiU0amXH77fSdrO6DzyjLE0DkCxfbM/N1SAs32d76y1xtCzM5H9eT0iDS7SdksgRXWJu05g==}
+    peerDependencies:
+      graphql: ^15.5.0 || ^16.0.0 || ^17.0.0
+      typescript: ^5.0.0 || ^6.0.0
 
   '@acemir/cssom@0.9.31':
     resolution: {integrity: sha512-ZnR3GSaH+/vJ0YlHau21FjfLYjMpYVIzTD8M8vIEQvIGxeOXyXdzCI140rrCY862p/C/BbzWsjc1dgnM9mkoTA==}
@@ -533,6 +560,31 @@ packages:
   '@floating-ui/utils@0.2.10':
     resolution: {integrity: sha512-aGTxbpbg8/b5JfU1HXSrbH3wXZuLPJcNEcZQFMxLs3oSzgtVu6nFPkbbGGUvBcUjKV2YyB9Wxxabo+HEH9tcRQ==}
 
+  '@gql.tada/cli-utils@1.7.3':
+    resolution: {integrity: sha512-3iQY5E/jvv3Lnh6D1Mh7zr+Bb9C/TGk1DHkm+lbIjQBnZAu2m+BcTcr1e3spUt6Aa6HG/xAN2XxpbWw9oZALEg==}
+    peerDependencies:
+      '@0no-co/graphqlsp': ^1.12.13
+      '@gql.tada/svelte-support': 1.0.2
+      '@gql.tada/vue-support': 1.0.2
+      graphql: ^15.5.0 || ^16.0.0 || ^17.0.0
+      typescript: ^5.0.0 || ^6.0.0
+    peerDependenciesMeta:
+      '@gql.tada/svelte-support':
+        optional: true
+      '@gql.tada/vue-support':
+        optional: true
+
+  '@gql.tada/internal@1.0.9':
+    resolution: {integrity: sha512-Bp8yi+kLrzIJ3l5Dfxhz48H4OCH2LCX+pShaPcJgh+oiBt6clrjUKDYNDD3Z78aDQ3+Tyrxe4dd0MfLgpSLPPg==}
+    peerDependencies:
+      graphql: ^15.5.0 || ^16.0.0 || ^17.0.0
+      typescript: ^5.0.0 || ^6.0.0
+
+  '@graphql-typed-document-node/core@3.2.0':
+    resolution: {integrity: sha512-mB9oAsNCm9aM3/SOv4YtBMqZbYj10R7dkq8byBqxGY/ncFwhf2oQzMV+LCRlWoDSEBJ3COiR1yeDvMtsoOsuFQ==}
+    peerDependencies:
+      graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
+
   '@hapi/hoek@9.3.0':
     resolution: {integrity: sha512-/c6rf4UJlmHlC9b5BaNvzAcFv7HZ2QHaV0D4/HNlBdvFnvQq8RI4kYdhyPCl7Xj+oWvTWQ8ujhqS53LIgAe6KQ==}
 
@@ -596,6 +648,13 @@ packages:
   '@internationalized/date@3.11.0':
     resolution: {integrity: sha512-BOx5huLAWhicM9/ZFs84CzP+V3gBW6vlpM02yzsdYC7TGlZJX1OJiEEHcSayF00Z+3jLlm4w79amvSt6RqKN3Q==}
 
+  '@iota/bcs@1.6.0':
+    resolution: {integrity: sha512-H8I9g+aPBQigSsHkydnnR6wmmTwOwI7iu/TghTOz6tikqVFM09cA2JlDQXRLDTSkW3Qlz6gONyVKzrBhoTkHxQ==}
+
+  '@iota/iota-sdk@1.14.0':
+    resolution: {integrity: sha512-nOq7EHD68p35nH+2c1sn/MnvEFEkRNRXTuiDYqI+SxWN1KcDuyYaSoFqz9PsQNhbdXzgbseHMo/L94LJ5jgIuA==}
+    engines: {node: '>=24'}
+
   '@jest/schemas@29.6.3':
     resolution: {integrity: sha512-mo5j5X+jIZmJQveBKeS/clAueipV7KgiX1vMgCxam1RNYiqE1w62n0/tJJnHtjW8ZHcQco5gY85jA3mi0L+nSA==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
@@ -635,6 +694,14 @@ packages:
     resolution: {integrity: sha512-Jer+M7DgIwT5IHfTayb4Iw/fkkxWNmC/mqn/nMh9JrbPbkxmyabfLQnhJ+JDn5HK77f84j34lubO3iqFtYAfMg==}
     peerDependencies:
       svelte: ^3.0.0 || ^4.0.0 || ^5.0.0-next.118
+
+  '@noble/curves@1.9.7':
+    resolution: {integrity: sha512-gbKGcRUYIjA3/zCCNaWDciTMFI0dCkvou3TL8Zmy5Nc7sJ47a0jtOeZoTaMxkuqRo9cRhjOdZJXegxYE5FN/xw==}
+    engines: {node: ^14.21.3 || >=16}
+
+  '@noble/hashes@1.8.0':
+    resolution: {integrity: sha512-jCs9ldd7NwzpgXDIf6P3+NrHh9/sD6CQdxHyjQI+h/6rDNo88ypBxxz45UDuZHz9r3tNz7N/VInSVoVdtXEI4A==}
+    engines: {node: ^14.21.3 || >=16}
 
   '@polka/url@1.0.0-next.29':
     resolution: {integrity: sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww==}
@@ -766,6 +833,15 @@ packages:
     resolution: {integrity: sha512-2HRCml6OztYXyJXAvdDXPKcawukWY2GpR5/nxKp4iBgiO3wcoEGkAaqctIbZcNB6KlUQBIqt8VYkNSj2397EfA==}
     cpu: [x64]
     os: [win32]
+
+  '@scure/base@1.2.6':
+    resolution: {integrity: sha512-g/nm5FgUa//MCj1gV09zTJTaM6KBAHqLN907YVQqf7zC49+DcO4B1so4ZX07Ef10Twr6nuqYEH9GEggFXA4Fmg==}
+
+  '@scure/bip32@1.7.0':
+    resolution: {integrity: sha512-E4FFX/N3f4B80AKWp5dP6ow+flD1LQZo/w8UnLGYZO674jS6YnYeepycOOksv+vLPSpgN35wgKgy+ybfTb2SMw==}
+
+  '@scure/bip39@1.6.0':
+    resolution: {integrity: sha512-+lF0BbLiJNwVlev4eKelw1WWLaiKXw7sSl8T6FvBlWkdX+94aGJ4o8XjUdlyhTCjd8c+B3KT3JfS8P0bLRNU6A==}
 
   '@sideway/address@4.1.5':
     resolution: {integrity: sha512-IqO/DUQHUkPeixNQ8n0JA6102hT9CmaljNTPmQ1u8MEhBo/R4Q8eKLN/vGZxuebwOroDB4cbpjheD4+/sKFK4Q==}
@@ -1090,6 +1166,9 @@ packages:
   '@types/mdurl@2.0.0':
     resolution: {integrity: sha512-RGdgjQUZba5p6QEFAVx2OGb8rQDL/cPRG7GiedRzMcJ1tYnUANBncjbSB1NRGwbvjcPeikRABz2nshyPk1bhWg==}
 
+  '@types/node@22.19.19':
+    resolution: {integrity: sha512-dyh/xO2Fh5bYrfWaaqGrRQQGkNdmYw6AmaAUvYeUMNTWQtvb796ikLdmTchRmOlOiIJ1TDXfWgVx1QkUlQ6Hew==}
+
   '@types/node@25.3.2':
     resolution: {integrity: sha512-RpV6r/ij22zRRdyBPcxDeKAzH43phWVKEjL2iksqo1Vz3CuBUrgmPpPhALKiRfU7OMCmeeO9vECBMsV0hMTG8Q==}
 
@@ -1304,6 +1383,9 @@ packages:
 
   bidi-js@1.0.3:
     resolution: {integrity: sha512-RKshQI1R3YQ+n9YJz2QQ147P66ELpa1FQEg20Dk8oW9t2KgLbpDLLp9aGZ7y8WHSshDknG0bknqGw5/tyCs5tw==}
+
+  bignumber.js@9.3.1:
+    resolution: {integrity: sha512-Ko0uX15oIUS7wJ3Rb30Fs6SkVbLmPBAKdlm7q9+ak9bbIeFf0MwuBsQV6z7+X768/cHsfg+WlysDWJcmthjsjQ==}
 
   brace-expansion@1.1.12:
     resolution: {integrity: sha512-9T9UjW3r0UW5c1Q7GTwllptXwhvYmEzFhzMfZ9H7FQWt+uZePjZPjBP/W1ZEyZ1twGWom5/56TF4lPcqjnDHcg==}
@@ -1630,8 +1712,18 @@ packages:
     resolution: {integrity: sha512-c/c15i26VrJ4IRt5Z89DnIzCGDn9EcebibhAOjw5ibqEHsE1wLUgkPn9RDmNcUKyU87GeaL633nyJ+pplFR2ZQ==}
     engines: {node: '>=18'}
 
+  gql.tada@1.9.2:
+    resolution: {integrity: sha512-QxRHVpxtrOVdYXz6oavq0lBM+Zdp0swapLGJcD4SLpXDcsD337BHDFrzqqjfkbepv0sSAiO0LGabu1kI5D5Gyg==}
+    hasBin: true
+    peerDependencies:
+      typescript: ^5.0.0 || ^6.0.0
+
   graceful-fs@4.2.11:
     resolution: {integrity: sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==}
+
+  graphql@16.14.0:
+    resolution: {integrity: sha512-BBvQ/406p+4CZbTpCbVPSxfzrZrbnuWSP1ELYgyS6B+hNeKzgrdB4JczCa5VZUBQrDa9hUngm0KnexY6pJRN5Q==}
+    engines: {node: ^12.22.0 || ^14.16.0 || ^16.0.0 || >=17.0.0}
 
   has-flag@4.0.0:
     resolution: {integrity: sha512-EykJT/Q1KjTWctppgIAgfSO0tKVuZUjhgMr17kqTumMl6Afv3EISleU7qZUzoXDFTAHTDC4NOoG/ZxU3EvlMPQ==}
@@ -2423,6 +2515,9 @@ packages:
   ufo@1.6.3:
     resolution: {integrity: sha512-yDJTmhydvl5lJzBmy/hyOAA0d+aqCBuwl818haVdYCRrWV84o7YyeVm4QlVHStqNrrJSTb6jKuFAVqAFsr+K3Q==}
 
+  undici-types@6.21.0:
+    resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
+
   undici-types@7.18.2:
     resolution: {integrity: sha512-AsuCzffGHJybSaRrmr5eHr81mwJU3kjw6M+uprWvCXiNeN9SOGwQ3Jn8jb8m3Z6izVgknn1R0FTCEAP2QrLY/w==}
 
@@ -2655,6 +2750,16 @@ packages:
     resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
 
 snapshots:
+
+  '@0no-co/graphql.web@1.2.0(graphql@16.14.0)':
+    optionalDependencies:
+      graphql: 16.14.0
+
+  '@0no-co/graphqlsp@1.15.4(graphql@16.14.0)(typescript@5.9.3)':
+    dependencies:
+      '@gql.tada/internal': 1.0.9(graphql@16.14.0)(typescript@5.9.3)
+      graphql: 16.14.0
+      typescript: 5.9.3
 
   '@acemir/cssom@0.9.31': {}
 
@@ -2913,7 +3018,9 @@ snapshots:
       '@eslint/core': 0.17.0
       levn: 0.4.1
 
-  '@exodus/bytes@1.14.1': {}
+  '@exodus/bytes@1.14.1(@noble/hashes@1.8.0)':
+    optionalDependencies:
+      '@noble/hashes': 1.8.0
 
   '@exodus/schemasafe@1.3.0':
     optional: true
@@ -2928,6 +3035,23 @@ snapshots:
       '@floating-ui/utils': 0.2.10
 
   '@floating-ui/utils@0.2.10': {}
+
+  '@gql.tada/cli-utils@1.7.3(@0no-co/graphqlsp@1.15.4(graphql@16.14.0)(typescript@5.9.3))(graphql@16.14.0)(typescript@5.9.3)':
+    dependencies:
+      '@0no-co/graphqlsp': 1.15.4(graphql@16.14.0)(typescript@5.9.3)
+      '@gql.tada/internal': 1.0.9(graphql@16.14.0)(typescript@5.9.3)
+      graphql: 16.14.0
+      typescript: 5.9.3
+
+  '@gql.tada/internal@1.0.9(graphql@16.14.0)(typescript@5.9.3)':
+    dependencies:
+      '@0no-co/graphql.web': 1.2.0(graphql@16.14.0)
+      graphql: 16.14.0
+      typescript: 5.9.3
+
+  '@graphql-typed-document-node/core@3.2.0(graphql@16.14.0)':
+    dependencies:
+      graphql: 16.14.0
 
   '@hapi/hoek@9.3.0':
     optional: true
@@ -2988,6 +3112,28 @@ snapshots:
     dependencies:
       '@swc/helpers': 0.5.19
 
+  '@iota/bcs@1.6.0':
+    dependencies:
+      '@scure/base': 1.2.6
+
+  '@iota/iota-sdk@1.14.0(typescript@5.9.3)':
+    dependencies:
+      '@graphql-typed-document-node/core': 3.2.0(graphql@16.14.0)
+      '@iota/bcs': 1.6.0
+      '@noble/curves': 1.9.7
+      '@noble/hashes': 1.8.0
+      '@scure/base': 1.2.6
+      '@scure/bip32': 1.7.0
+      '@scure/bip39': 1.6.0
+      bignumber.js: 9.3.1
+      gql.tada: 1.9.2(graphql@16.14.0)(typescript@5.9.3)
+      graphql: 16.14.0
+      valibot: 1.2.0(typescript@5.9.3)
+    transitivePeerDependencies:
+      - '@gql.tada/svelte-support'
+      - '@gql.tada/vue-support'
+      - typescript
+
   '@jest/schemas@29.6.3':
     dependencies:
       '@sinclair/typebox': 0.27.10
@@ -3041,6 +3187,12 @@ snapshots:
       focus-trap: 7.8.0
       nanoid: 5.1.6
       svelte: 5.53.6
+
+  '@noble/curves@1.9.7':
+    dependencies:
+      '@noble/hashes': 1.8.0
+
+  '@noble/hashes@1.8.0': {}
 
   '@polka/url@1.0.0-next.29': {}
 
@@ -3121,6 +3273,19 @@ snapshots:
 
   '@rollup/rollup-win32-x64-msvc@4.59.0':
     optional: true
+
+  '@scure/base@1.2.6': {}
+
+  '@scure/bip32@1.7.0':
+    dependencies:
+      '@noble/curves': 1.9.7
+      '@noble/hashes': 1.8.0
+      '@scure/base': 1.2.6
+
+  '@scure/bip39@1.6.0':
+    dependencies:
+      '@noble/hashes': 1.8.0
+      '@scure/base': 1.2.6
 
   '@sideway/address@4.1.5':
     dependencies:
@@ -3383,14 +3548,14 @@ snapshots:
     dependencies:
       svelte: 5.53.6
 
-  '@testing-library/svelte@5.3.1(svelte@5.53.6)(vite@7.3.1(@types/node@25.3.2)(jiti@2.6.1)(lightningcss@1.31.1)(yaml@2.5.0))(vitest@4.0.18(@types/node@25.3.2)(jiti@2.6.1)(jsdom@27.4.0)(lightningcss@1.31.1)(yaml@2.5.0))':
+  '@testing-library/svelte@5.3.1(svelte@5.53.6)(vite@7.3.1(@types/node@25.3.2)(jiti@2.6.1)(lightningcss@1.31.1)(yaml@2.5.0))(vitest@4.0.18(@types/node@25.3.2)(jiti@2.6.1)(jsdom@27.4.0(@noble/hashes@1.8.0))(lightningcss@1.31.1)(yaml@2.5.0))':
     dependencies:
       '@testing-library/dom': 10.4.1
       '@testing-library/svelte-core': 1.0.0(svelte@5.53.6)
       svelte: 5.53.6
     optionalDependencies:
       vite: 7.3.1(@types/node@25.3.2)(jiti@2.6.1)(lightningcss@1.31.1)(yaml@2.5.0)
-      vitest: 4.0.18(@types/node@25.3.2)(jiti@2.6.1)(jsdom@27.4.0)(lightningcss@1.31.1)(yaml@2.5.0)
+      vitest: 4.0.18(@types/node@25.3.2)(jiti@2.6.1)(jsdom@27.4.0(@noble/hashes@1.8.0))(lightningcss@1.31.1)(yaml@2.5.0)
 
   '@types/aria-query@5.0.4': {}
 
@@ -3421,15 +3586,20 @@ snapshots:
 
   '@types/mdurl@2.0.0': {}
 
+  '@types/node@22.19.19':
+    dependencies:
+      undici-types: 6.21.0
+
   '@types/node@25.3.2':
     dependencies:
       undici-types: 7.18.2
+    optional: true
 
   '@types/pako@1.0.7': {}
 
   '@types/qrcode@1.5.6':
     dependencies:
-      '@types/node': 25.3.2
+      '@types/node': 22.19.19
 
   '@types/trusted-types@2.0.7': {}
 
@@ -3561,7 +3731,7 @@ snapshots:
       validator: 13.15.26
     optional: true
 
-  '@vitest/coverage-v8@4.0.18(vitest@4.0.18(@types/node@25.3.2)(jiti@2.6.1)(jsdom@27.4.0)(lightningcss@1.31.1)(yaml@2.5.0))':
+  '@vitest/coverage-v8@4.0.18(vitest@4.0.18(@types/node@25.3.2)(jiti@2.6.1)(jsdom@27.4.0(@noble/hashes@1.8.0))(lightningcss@1.31.1)(yaml@2.5.0))':
     dependencies:
       '@bcoe/v8-coverage': 1.0.2
       '@vitest/utils': 4.0.18
@@ -3573,7 +3743,7 @@ snapshots:
       obug: 2.1.1
       std-env: 3.10.0
       tinyrainbow: 3.0.3
-      vitest: 4.0.18(@types/node@25.3.2)(jiti@2.6.1)(jsdom@27.4.0)(lightningcss@1.31.1)(yaml@2.5.0)
+      vitest: 4.0.18(@types/node@25.3.2)(jiti@2.6.1)(jsdom@27.4.0(@noble/hashes@1.8.0))(lightningcss@1.31.1)(yaml@2.5.0)
 
   '@vitest/expect@4.0.18':
     dependencies:
@@ -3678,6 +3848,8 @@ snapshots:
   bidi-js@1.0.3:
     dependencies:
       require-from-string: 2.0.2
+
+  bignumber.js@9.3.1: {}
 
   brace-expansion@1.1.12:
     dependencies:
@@ -4020,13 +4192,27 @@ snapshots:
 
   globals@16.5.0: {}
 
+  gql.tada@1.9.2(graphql@16.14.0)(typescript@5.9.3):
+    dependencies:
+      '@0no-co/graphql.web': 1.2.0(graphql@16.14.0)
+      '@0no-co/graphqlsp': 1.15.4(graphql@16.14.0)(typescript@5.9.3)
+      '@gql.tada/cli-utils': 1.7.3(@0no-co/graphqlsp@1.15.4(graphql@16.14.0)(typescript@5.9.3))(graphql@16.14.0)(typescript@5.9.3)
+      '@gql.tada/internal': 1.0.9(graphql@16.14.0)(typescript@5.9.3)
+      typescript: 5.9.3
+    transitivePeerDependencies:
+      - '@gql.tada/svelte-support'
+      - '@gql.tada/vue-support'
+      - graphql
+
   graceful-fs@4.2.11: {}
+
+  graphql@16.14.0: {}
 
   has-flag@4.0.0: {}
 
-  html-encoding-sniffer@6.0.0:
+  html-encoding-sniffer@6.0.0(@noble/hashes@1.8.0):
     dependencies:
-      '@exodus/bytes': 1.14.1
+      '@exodus/bytes': 1.14.1(@noble/hashes@1.8.0)
     transitivePeerDependencies:
       - '@noble/hashes'
 
@@ -4130,15 +4316,15 @@ snapshots:
     dependencies:
       argparse: 2.0.1
 
-  jsdom@27.4.0:
+  jsdom@27.4.0(@noble/hashes@1.8.0):
     dependencies:
       '@acemir/cssom': 0.9.31
       '@asamuzakjp/dom-selector': 6.8.1
-      '@exodus/bytes': 1.14.1
+      '@exodus/bytes': 1.14.1(@noble/hashes@1.8.0)
       cssstyle: 5.3.7
       data-urls: 6.0.1
       decimal.js: 10.6.0
-      html-encoding-sniffer: 6.0.0
+      html-encoding-sniffer: 6.0.0(@noble/hashes@1.8.0)
       http-proxy-agent: 7.0.2
       https-proxy-agent: 7.0.6
       is-potential-custom-element-name: 1.0.1
@@ -4770,7 +4956,10 @@ snapshots:
 
   ufo@1.6.3: {}
 
-  undici-types@7.18.2: {}
+  undici-types@6.21.0: {}
+
+  undici-types@7.18.2:
+    optional: true
 
   unplugin-icons@22.5.0(svelte@5.53.6):
     dependencies:
@@ -4800,7 +4989,6 @@ snapshots:
   valibot@1.2.0(typescript@5.9.3):
     optionalDependencies:
       typescript: 5.9.3
-    optional: true
 
   validator@13.15.26:
     optional: true
@@ -4824,7 +5012,7 @@ snapshots:
     optionalDependencies:
       vite: 7.3.1(@types/node@25.3.2)(jiti@2.6.1)(lightningcss@1.31.1)(yaml@2.5.0)
 
-  vitest@4.0.18(@types/node@25.3.2)(jiti@2.6.1)(jsdom@27.4.0)(lightningcss@1.31.1)(yaml@2.5.0):
+  vitest@4.0.18(@types/node@25.3.2)(jiti@2.6.1)(jsdom@27.4.0(@noble/hashes@1.8.0))(lightningcss@1.31.1)(yaml@2.5.0):
     dependencies:
       '@vitest/expect': 4.0.18
       '@vitest/mocker': 4.0.18(vite@7.3.1(@types/node@25.3.2)(jiti@2.6.1)(lightningcss@1.31.1)(yaml@2.5.0))
@@ -4848,7 +5036,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 25.3.2
-      jsdom: 27.4.0
+      jsdom: 27.4.0(@noble/hashes@1.8.0)
     transitivePeerDependencies:
       - jiti
       - less

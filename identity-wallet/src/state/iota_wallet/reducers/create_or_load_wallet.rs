@@ -13,7 +13,8 @@ use iota_sdk::types::crypto::{EncodeDecodeBase64, SignatureScheme};
 pub const IOTA_WALLET_STORE_KEY: &str = "iota-wallet";
 
 pub async fn create_or_load_wallet(state: AppState, action: Action) -> Result<AppState, AppError> {
-    let Some(payload) = listen::<crate::state::iota_wallet::actions::create_or_load_wallet::CreateOrLoadIotaWallet>(action)
+    let Some(payload) =
+        listen::<crate::state::iota_wallet::actions::create_or_load_wallet::CreateOrLoadIotaWallet>(action)
     else {
         return Ok(state);
     };
@@ -54,6 +55,7 @@ pub async fn create_or_load_wallet(state: AppState, action: Action) -> Result<Ap
                 network: payload.network,
                 did: None,
                 did_network: None,
+                did_document: None,
                 identity_controller_cap: None,
             };
             let bytes = serde_json::to_vec(&wallet).map_err(AppError::DeserializeFailed)?;

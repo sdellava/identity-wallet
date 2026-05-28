@@ -31,6 +31,10 @@ identity_core = { git = "https://github.com/iotaledger/identity", tag = "v1.9.6-
 identity_eddsa_verifier = { git = "https://github.com/iotaledger/identity", tag = "v1.9.6-beta.1" }
 identity_iota = { git = "https://github.com/iotaledger/identity", tag = "v1.9.6-beta.1" }
 identity_jose = { git = "https://github.com/iotaledger/identity", tag = "v1.9.6-beta.1" }
+identity_storage = { git = "https://github.com/iotaledger/identity", tag = "v1.9.6-beta.1" }
+product_common = { git = "https://github.com/iotaledger/product-core.git", tag = "v0.8.16", package = "product_common", features = [
+    "gas-station",
+] }
 iota-sdk = { git = "https://github.com/iotaledger/iota", package = "iota-sdk", rev = "96196f0da231883ec69cda04892c600ef6afa982" }
 iota-keys = { git = "https://github.com/iotaledger/iota", package = "iota-keys", rev = "96196f0da231883ec69cda04892c600ef6afa982" }
 iota-sdk-types = { git = "https://github.com/iotaledger/iota-rust-sdk.git", rev = "e19c78a1bee17e0bf85fcd5b16a2f080cef26274", features = [

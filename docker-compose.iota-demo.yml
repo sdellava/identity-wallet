@@ -32,7 +32,7 @@ services:
       - "traefik.http.middlewares.iota-tx-demo-cors.headers.addVaryHeader=true"
 
       - "traefik.http.middlewares.iota-tx-demo-sec.headers.permissionsPolicy=geolocation=(), camera=*, microphone=(), payment=(), usb=()"
-      - "traefik.http.middlewares.iota-tx-demo-sec.headers.customResponseHeaders.Content-Security-Policy=default-src 'self' https://cdn.jsdelivr.net data: blob:; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: blob:; connect-src 'self' http://unicore.objectid.io https://unicore.objectid.io https://api.testnet.iota.cafe https://faucet.testnet.iota.cafe;"
+      - "traefik.http.middlewares.iota-tx-demo-sec.headers.customResponseHeaders.Content-Security-Policy=default-src 'self' https://cdn.jsdelivr.net data: blob:; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: blob:; connect-src 'self' http://unicore.objectid.io https://unicore.objectid.io https://api.testnet.iota.cafe https://gas1.objectid.io https://gas2.objectid.io;"
       - "traefik.http.middlewares.iota-tx-demo-sec.headers.stsSeconds=63072000"
       - "traefik.http.middlewares.iota-tx-demo-sec.headers.contentTypeNosniff=true"
       - "traefik.http.middlewares.iota-tx-demo-sec.headers.referrerPolicy=strict-origin-when-cross-origin"

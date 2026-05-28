@@ -32,6 +32,61 @@ use secret_storage::{Error as SecretStorageError, Signer};
 
 const IOTA_IDENTITY_GAS_BUDGET: u64 = 50_000_000;
 
+#[derive(Clone, Copy)]
+pub(crate) struct IotaGasStation {
+    pub url: &'static str,
+    pub token: &'static str,
+}
+
+struct IotaGasStationConfig {
+    gas_station_1_url: &'static str,
+    gas_station_1_token: &'static str,
+    gas_station_2_url: &'static str,
+    gas_station_2_token: &'static str,
+}
+
+const GAS_STATION_TESTNET: IotaGasStationConfig = IotaGasStationConfig {
+    gas_station_1_url: "https://gas1.objectid.io",
+    gas_station_1_token: "1111",
+    gas_station_2_url: "https://gas2.objectid.io",
+    gas_station_2_token: "1111",
+};
+
+const GAS_STATION_MAINNET: IotaGasStationConfig = IotaGasStationConfig {
+    gas_station_1_url: "https://m-gas1.objectid.io",
+    gas_station_1_token: "1111",
+    gas_station_2_url: "https://m-gas2.objectid.io",
+    gas_station_2_token: "1111",
+};
+
+pub(crate) fn gas_stations_for_network(network: IotaNetwork) -> &'static [IotaGasStation; 2] {
+    const TESTNET_GAS_STATIONS: [IotaGasStation; 2] = [
+        IotaGasStation {
+            url: GAS_STATION_TESTNET.gas_station_1_url,
+            token: GAS_STATION_TESTNET.gas_station_1_token,
+        },
+        IotaGasStation {
+            url: GAS_STATION_TESTNET.gas_station_2_url,
+            token: GAS_STATION_TESTNET.gas_station_2_token,
+        },
+    ];
+    const MAINNET_GAS_STATIONS: [IotaGasStation; 2] = [
+        IotaGasStation {
+            url: GAS_STATION_MAINNET.gas_station_1_url,
+            token: GAS_STATION_MAINNET.gas_station_1_token,
+        },
+        IotaGasStation {
+            url: GAS_STATION_MAINNET.gas_station_2_url,
+            token: GAS_STATION_MAINNET.gas_station_2_token,
+        },
+    ];
+
+    match network {
+        IotaNetwork::Testnet => &TESTNET_GAS_STATIONS,
+        IotaNetwork::Mainnet => &MAINNET_GAS_STATIONS,
+    }
+}
+
 struct WalletSigner {
     keystore: InMemKeystore,
     address: IotaAddress,

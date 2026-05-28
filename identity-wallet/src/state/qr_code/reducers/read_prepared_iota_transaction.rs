@@ -6,8 +6,7 @@ use crate::{
         actions::{listen, Action},
         iota_wallet::{
             actions::sign_prepared_transaction::SignPreparedIotaTransaction,
-            reducers::sign_prepared_transaction::sign_prepared_transaction,
-            IotaNetwork,
+            reducers::sign_prepared_transaction::sign_prepared_transaction, IotaNetwork,
         },
         qr_code::actions::qrcode_scanned::QrCodeScanned,
         AppState,
@@ -22,13 +21,24 @@ struct PreparedIotaTransactionQr {
     kind: String,
     #[serde(default)]
     network: IotaNetwork,
-    tx_data_bcs_base64: String,
+    #[serde(default)]
+    tx_data_bcs_base64: Option<String>,
+    #[serde(default)]
+    tx_kind_bcs_base64: Option<String>,
+    #[serde(default = "default_gas_budget")]
+    gas_budget: u64,
+    #[serde(default)]
+    gas_price: Option<u64>,
     #[serde(default = "default_submit")]
     submit: bool,
 }
 
 fn default_submit() -> bool {
     true
+}
+
+fn default_gas_budget() -> u64 {
+    5_000_000
 }
 
 pub async fn read_prepared_iota_transaction(state: AppState, action: Action) -> Result<AppState, AppError> {
@@ -59,6 +69,9 @@ pub async fn read_prepared_iota_transaction(state: AppState, action: Action) -> 
         state,
         Arc::new(SignPreparedIotaTransaction {
             tx_data_bcs_base64: qr.tx_data_bcs_base64,
+            tx_kind_bcs_base64: qr.tx_kind_bcs_base64,
+            gas_budget: qr.gas_budget,
+            gas_price: qr.gas_price,
             network: qr.network,
             submit: qr.submit,
         }),

@@ -49,6 +49,11 @@
     }
   }
 
+  const shortDid = (did: string) => {
+    const [prefix, address] = did.match(/^(did:iota:[^:]+:)(.+)$/)?.slice(1) ?? ['', did];
+    return address.length > 8 ? `${prefix}${address.slice(0, 8)}...` : did;
+  };
+
   // security: clear onboarding state after successful creation
   // TODO: move somewhere else
   onboarding_state.set({});
@@ -76,16 +81,18 @@
     {#if $state.iota_wallet.did}
       <button
         class="mt-4 w-full rounded-xl border border-slate-200 bg-silver p-4 text-left dark:border-slate-600 dark:bg-navy"
-        onclick={() => goto('/me/settings/app/keys')}
+        onclick={() => goto('/me/iota-identity')}
       >
         <div class="flex items-center justify-between gap-3">
-          <p class="text-[13px]/[18px] font-semibold text-slate-800 dark:text-grey">IOTA Identity</p>
+          <p class="text-[13px]/[18px] font-semibold text-slate-800 dark:text-grey">
+            European Verifiable Identity
+          </p>
           <p class="rounded-md bg-primary px-2 py-1 text-[10px]/[14px] font-semibold text-white dark:text-dark">
             {$state.iota_wallet.network}
           </p>
         </div>
         <p class="mt-2 font-mono text-[11px]/[16px] break-all text-slate-600 dark:text-slate-300">
-          {$state.iota_wallet.did}
+          {shortDid($state.iota_wallet.did)}
         </p>
       </button>
     {/if}
@@ -173,7 +180,7 @@
           <Button label={$LL.CONTINUE()} on:click={() => goto('/goals')} />
         </div>
       </ActionSheet>
-    {:else}
+    {:else if !$state.iota_wallet.did}
       <!-- Skipped onboarding journey -->
       <div class="flex grow flex-col items-center justify-center">
         <IconMessage icon={GhostFillIcon} title={$LL.ME.EMPTY_CREDENTIALS.TITLE()} />

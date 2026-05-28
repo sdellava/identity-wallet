@@ -3,14 +3,12 @@ import { Buffer } from 'node:buffer';
 import { randomUUID } from 'node:crypto';
 
 import { IotaClient, getFullnodeUrl } from '@iota/iota-sdk/client';
-import { requestIotaFromFaucet } from '@iota/iota-sdk/faucet';
 import { Transaction } from '@iota/iota-sdk/transactions';
 import { isValidIotaAddress, normalizeIotaAddress } from '@iota/iota-sdk/utils';
 import QRCode from 'qrcode';
 
 const DEFAULT_BIND = '127.0.0.1:8787';
 const DEFAULT_NETWORK = 'testnet';
-const DEFAULT_FAUCET_URL = 'https://faucet.testnet.iota.cafe';
 const DEFAULT_GAS_BUDGET = 5_000_000n;
 const DEFAULT_TRANSFER_AMOUNT = 1n;
 
@@ -18,7 +16,6 @@ const payloads = new Map<string, string>();
 const bind = process.env.IOTA_TEST_TX_SERVER_BIND ?? DEFAULT_BIND;
 const network = process.env.IOTA_TEST_TX_NETWORK ?? DEFAULT_NETWORK;
 const rpcUrl = process.env.IOTA_TEST_TX_RPC_URL ?? getFullnodeUrl(network as Parameters<typeof getFullnodeUrl>[0]);
-const faucetUrl = process.env.IOTA_TEST_TX_FAUCET_URL ?? DEFAULT_FAUCET_URL;
 const gasBudget = BigInt(process.env.IOTA_TEST_TX_GAS_BUDGET ?? DEFAULT_GAS_BUDGET.toString());
 const transferAmount = BigInt(process.env.IOTA_TEST_TX_TRANSFER_AMOUNT ?? DEFAULT_TRANSFER_AMOUNT.toString());
 
@@ -82,51 +79,23 @@ async function handleRequest(request: IncomingMessage, response: ServerResponse)
 }
 
 async function preparePayload(address: string) {
-  await ensureGasCoin(address);
-
   const transaction = new Transaction();
   transaction.setSender(address);
   transaction.setGasBudget(gasBudget);
-  transaction.setGasPrice(await client.getReferenceGasPrice());
 
   const [coin] = transaction.splitCoins(transaction.gas, [transferAmount]);
   transaction.transferObjects([coin], address);
 
-  const txBytes = await transaction.build({ client });
+  const gasPrice = await client.getReferenceGasPrice();
+  const txBytes = await transaction.build({ client, onlyTransactionKind: true });
   return JSON.stringify({
     type: 'iota:prepared-transaction',
     network,
     submit: true,
-    tx_data_bcs_base64: Buffer.from(txBytes).toString('base64'),
+    gas_budget: Number(gasBudget),
+    gas_price: Number(gasPrice),
+    tx_kind_bcs_base64: Buffer.from(txBytes).toString('base64'),
   });
-}
-
-async function ensureGasCoin(address: string) {
-  const coin = await firstSpendableCoin(address);
-  if (coin) {
-    return;
-  }
-
-  await requestIotaFromFaucet({
-    host: faucetUrl,
-    recipient: address,
-    maxAttempts: 60,
-    delayMs: 1000,
-  });
-
-  for (let attempt = 0; attempt < 60; attempt += 1) {
-    if (await firstSpendableCoin(address)) {
-      return;
-    }
-    await sleep(1000);
-  }
-
-  throw new Error(`faucet did not fund ${address} within 60 seconds`);
-}
-
-async function firstSpendableCoin(address: string) {
-  const coins = await client.getCoins({ owner: address });
-  return coins.data.find((coin) => BigInt(coin.balance) >= gasBudget);
 }
 
 async function qrPage(address: string, payloadUrl: string, payload: string) {
@@ -250,8 +219,4 @@ function htmlEscape(value: string) {
 
 function htmlAttrEscape(value: string) {
   return htmlEscape(value);
-}
-
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }

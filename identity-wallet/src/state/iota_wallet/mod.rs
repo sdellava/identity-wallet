@@ -31,7 +31,12 @@ pub struct IotaWalletState {
     pub public_key: Option<String>,
     pub seed_phrase: Option<String>,
     pub did: Option<String>,
+    pub did_document: Option<String>,
     pub identity_controller_cap: Option<String>,
+    pub identity_validation_status: Option<String>,
+    pub identity_validation_error: Option<String>,
+    pub identity_rotation_status: Option<String>,
+    pub identity_destruction_status: Option<String>,
     pub faucet_status: Option<String>,
     pub last_transaction_digest: Option<String>,
     pub last_error: Option<String>,
@@ -46,6 +51,8 @@ pub(crate) struct StoredIotaWallet {
     pub network: IotaNetwork,
     pub did: Option<String>,
     pub did_network: Option<IotaNetwork>,
+    #[serde(default)]
+    pub did_document: Option<String>,
     pub identity_controller_cap: Option<String>,
 }
 
@@ -60,6 +67,11 @@ impl From<&StoredIotaWallet> for IotaWalletState {
         } else {
             None
         };
+        let did_document = if did.is_some() {
+            wallet.did_document.clone()
+        } else {
+            None
+        };
 
         Self {
             network: wallet.network,
@@ -67,7 +79,12 @@ impl From<&StoredIotaWallet> for IotaWalletState {
             public_key: wallet.public_key.clone(),
             seed_phrase: Some(wallet.mnemonic.clone()),
             did,
+            did_document,
             identity_controller_cap,
+            identity_validation_status: None,
+            identity_validation_error: None,
+            identity_rotation_status: None,
+            identity_destruction_status: None,
             faucet_status: None,
             last_transaction_digest: None,
             last_error: None,

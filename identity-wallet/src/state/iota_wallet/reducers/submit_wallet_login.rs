@@ -13,6 +13,7 @@ use aes_gcm::{
     Aes256Gcm, Nonce,
 };
 use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine as _};
+use bip39::{Language, Mnemonic, Seed};
 use p256::{
     ecdh::EphemeralSecret,
     elliptic_curve::{
@@ -42,11 +43,12 @@ pub async fn submit_wallet_login(state: AppState, action: Action) -> Result<AppS
         return Err(AppError::MissingStateParameterError("wallet login prompt"));
     };
 
-    let seed = state
+    let seed_phrase = state
         .iota_wallet
         .seed_phrase
         .clone()
         .ok_or(AppError::MissingStateParameterError("IOTA wallet seed"))?;
+    let seed = seed_hex_from_seed_phrase(&seed_phrase)?;
     let did = state
         .iota_wallet
         .did
@@ -56,18 +58,19 @@ pub async fn submit_wallet_login(state: AppState, action: Action) -> Result<AppS
     let address = state.iota_wallet.address.clone();
     let network = state.iota_wallet.network.as_str();
 
-    let payload = if let (Some(public_key_x), Some(public_key_y)) = (encryption_public_key_x, encryption_public_key_y) {
+    let response_builder = reqwest::Client::new().post(&response_url);
+    let response = if let (Some(public_key_x), Some(public_key_y)) = (encryption_public_key_x, encryption_public_key_y)
+    {
         let wallet_login_response =
             encrypt_wallet_login_response(&session_id, &did, &seed, network, &public_key_x, &public_key_y)?;
 
-        json!({
-            "sessionId": session_id,
-            "wallet_login_response": wallet_login_response,
-            "response": wallet_login_response,
-            "payload": wallet_login_response,
-        })
+        response_builder
+            .header(reqwest::header::CONTENT_TYPE, "text/plain")
+            .body(wallet_login_response)
+            .send()
+            .await
     } else {
-        json!({
+        let payload = json!({
             "sessionId": session_id,
             "seed": seed,
             "seed_phrase": seed,
@@ -75,15 +78,14 @@ pub async fn submit_wallet_login(state: AppState, action: Action) -> Result<AppS
             "did_document": did_document,
             "address": address,
             "network": network,
-        })
-    };
-
-    let response = reqwest::Client::new()
-        .post(&response_url)
-        .json(&payload)
-        .send()
-        .await
-        .map_err(|e| AppError::Error(format!("Failed to send wallet login response: {e}")))?;
+        });
+        response_builder
+            .header(reqwest::header::CONTENT_TYPE, "text/plain")
+            .body(payload.to_string())
+            .send()
+            .await
+    }
+    .map_err(|e| AppError::Error(format!("Failed to send wallet login response: {e}")))?;
 
     if !response.status().is_success() {
         let status = response.status();
@@ -99,6 +101,28 @@ pub async fn submit_wallet_login(state: AppState, action: Action) -> Result<AppS
         }),
         ..state
     })
+}
+
+fn seed_hex_from_seed_phrase(seed_phrase: &str) -> Result<String, AppError> {
+    let trimmed = seed_phrase.trim();
+    if (trimmed.len() == 64 || trimmed.len() == 128) && trimmed.bytes().all(|b| b.is_ascii_hexdigit()) {
+        return Ok(trimmed.to_ascii_lowercase());
+    }
+
+    let mnemonic = Mnemonic::from_phrase(trimmed, Language::English)
+        .map_err(|e| AppError::Error(format!("Failed to parse IOTA wallet mnemonic: {e:?}")))?;
+    let seed = Seed::new(&mnemonic, "");
+    Ok(hex_lower(seed.as_bytes()))
+}
+
+fn hex_lower(bytes: &[u8]) -> String {
+    const HEX: &[u8; 16] = b"0123456789abcdef";
+    let mut output = String::with_capacity(bytes.len() * 2);
+    for byte in bytes {
+        output.push(HEX[(byte >> 4) as usize] as char);
+        output.push(HEX[(byte & 0x0f) as usize] as char);
+    }
+    output
 }
 
 fn encrypt_wallet_login_response(

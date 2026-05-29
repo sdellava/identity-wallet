@@ -14604,6 +14604,7 @@ dependencies = [
  "oid4vc",
  "rand 0.8.5",
  "rustls 0.23.31",
+ "rustls-platform-verifier 0.5.3",
  "rustls-platform-verifier 0.6.1",
  "serde",
  "serde_json",

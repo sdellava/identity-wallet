@@ -1,21 +1,59 @@
 <script lang="ts">
+  import { tick } from 'svelte';
+  import { writable } from 'svelte/store';
   import { goto } from '$app/navigation';
   import { open } from '@tauri-apps/plugin-shell';
 
-  import { TopNavBar } from '$lib/components';
+  import { ActionSheet, TopNavBar } from '$lib/components';
   import { dispatch } from '$lib/dispatcher';
-  import { ArrowCounterClockwiseBoldIcon, ArrowSquareOutBoldIcon, CodeRegularIcon } from '$lib/icons';
+  import {
+    ArrowCounterClockwiseBoldIcon,
+    ArrowSquareOutBoldIcon,
+    CodeRegularIcon,
+    TrashRegularIcon,
+    WarningCircleFillIcon,
+  } from '$lib/icons';
   import { state } from '$lib/stores';
 
   import { buildIotaExplorerSearchLink } from '../../activity/utils';
 
   let rotating = false;
+  let destroying = false;
   let showDocument = false;
+  let resultTitle = '';
+  let resultDescription = '';
+  const resultOpen = writable(false);
+  const destroyConfirmOpen = writable(false);
+
+  const showResult = (title: string, description: string) => {
+    resultTitle = title;
+    resultDescription = description;
+    resultOpen.set(true);
+  };
 
   const rotateKeys = async () => {
     rotating = true;
     await dispatch({ type: '[IOTA Wallet] Rotate identity keys', payload: {} });
+    await tick();
     rotating = false;
+    if ($state.iota_wallet.last_error) {
+      showResult('Key rotation failed', $state.iota_wallet.last_error);
+    } else {
+      showResult('Keys rotated', 'The identity keys were rotated successfully.');
+    }
+  };
+
+  const destroyIdentity = async () => {
+    destroying = true;
+    destroyConfirmOpen.set(false);
+    await dispatch({ type: '[IOTA Wallet] Destroy identity', payload: {} });
+    await tick();
+    destroying = false;
+    if ($state.iota_wallet.last_error) {
+      showResult('Identity destruction failed', $state.iota_wallet.last_error);
+    } else {
+      showResult('Identity destroyed', 'The identity controller cap was removed and destroyed successfully.');
+    }
   };
 
   const openExplorer = async () => {
@@ -65,7 +103,7 @@
       </p>
     </section>
 
-    <section class="grid grid-cols-2 gap-3">
+    <section class="grid grid-cols-3 gap-3">
       <button
         class="flex min-h-24 flex-col items-start justify-between rounded-xl border border-slate-200 bg-white p-4 text-left disabled:opacity-50 dark:border-slate-600 dark:bg-dark"
         onclick={rotateKeys}
@@ -85,6 +123,16 @@
           {showDocument ? 'Hide document' : 'DID document'}
         </span>
       </button>
+      <button
+        class="flex min-h-24 flex-col items-start justify-between rounded-xl border border-rose-200 bg-white p-4 text-left text-rose-500 disabled:opacity-50 dark:border-rose-900/60 dark:bg-dark"
+        onclick={() => destroyConfirmOpen.set(true)}
+        disabled={destroying}
+      >
+        <TrashRegularIcon class="size-5" />
+        <span class="text-[13px]/[18px] font-semibold">
+          {destroying ? 'Destroying' : 'Destroy identity'}
+        </span>
+      </button>
     </section>
 
     {#if showDocument}
@@ -94,25 +142,38 @@
       </section>
     {/if}
 
-    {#if $state.iota_wallet.identity_controller_cap}
-      <section class="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-600 dark:bg-dark">
-        <p class="text-base font-semibold text-slate-800 dark:text-grey">Controller cap</p>
-        <p class="mt-3 font-mono text-[11px]/[16px] break-all text-slate-800 dark:text-grey">
-          {$state.iota_wallet.identity_controller_cap}
-        </p>
-      </section>
-    {/if}
-
-    {#if $state.iota_wallet.identity_rotation_status}
-      <p class="rounded-xl bg-white p-4 text-[12px]/[18px] font-medium text-slate-600 dark:bg-dark dark:text-slate-300">
-        Key rotation: {$state.iota_wallet.identity_rotation_status}
-      </p>
-    {/if}
-  {/if}
-
-  {#if $state.iota_wallet.last_error}
-    <p class="rounded-xl bg-white p-4 text-[12px]/[18px] font-medium text-rose-500 dark:bg-dark">
-      {$state.iota_wallet.last_error}
-    </p>
+    <ActionSheet
+      titleText="Destroy identity"
+      descriptionText="This removes the controller cap from the identity and destroys it on IOTA."
+      open={destroyConfirmOpen}
+    >
+      <WarningCircleFillIcon slot="icon" class="mb-3 size-10 text-rose-500" />
+      <div slot="content" class="flex w-full flex-col gap-3 pt-5">
+        <button
+          class="h-12 w-full rounded-xl bg-rose-500 px-4 py-2 text-[13px]/[24px] font-semibold text-white disabled:opacity-50"
+          onclick={destroyIdentity}
+          disabled={destroying}
+        >
+          {destroying ? 'Destroying' : 'Destroy identity'}
+        </button>
+        <button
+          class="h-12 w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-[13px]/[24px] font-semibold text-slate-800 dark:border-slate-600 dark:bg-dark dark:text-grey"
+          onclick={() => destroyConfirmOpen.set(false)}
+        >
+          Cancel
+        </button>
+      </div>
+    </ActionSheet>
   {/if}
 </div>
+
+<ActionSheet titleText={resultTitle} descriptionText={resultDescription} open={resultOpen}>
+  <div slot="content" class="flex w-full flex-col pt-5">
+    <button
+      class="h-12 w-full rounded-xl bg-primary px-4 py-2 text-[13px]/[24px] font-semibold text-white dark:text-dark"
+      onclick={() => resultOpen.set(false)}
+    >
+      OK
+    </button>
+  </div>
+</ActionSheet>

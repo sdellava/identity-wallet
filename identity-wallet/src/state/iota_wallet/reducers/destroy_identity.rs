@@ -25,7 +25,7 @@ use identity_iota::{
             object::Owner,
             programmable_transaction_builder::ProgrammableTransactionBuilder as Ptb,
             transaction::{Argument, ObjectArg, ProgrammableTransaction},
-            TypeTag, IOTA_CLOCK_OBJECT_ID, IOTA_CLOCK_OBJECT_SHARED_VERSION, MOVE_STDLIB_PACKAGE_ID,
+            TypeTag, IOTA_FRAMEWORK_PACKAGE_ID, MOVE_STDLIB_PACKAGE_ID,
         },
         OptionalSync,
     },
@@ -86,18 +86,38 @@ impl Transaction for DestroyIdentityTx {
                 controller_cap_ref.reference.to_object_ref(),
             ))
             .map_err(|e| RebasedIdentityError::InvalidArgument(e.to_string()))?;
-        let clock = ptb
-            .obj(ObjectArg::SharedObject {
-                id: IOTA_CLOCK_OBJECT_ID,
-                initial_shared_version: IOTA_CLOCK_OBJECT_SHARED_VERSION,
-                mutable: false,
-            })
-            .map_err(|e| RebasedIdentityError::InvalidArgument(e.to_string()))?;
         let expiration = ptb.programmable_move_call(
             MOVE_STDLIB_PACKAGE_ID,
             STD_OPTION_MODULE_NAME.into(),
             ident_str!("none").into(),
             vec![TypeTag::U64],
+            vec![],
+        );
+        let threshold = ptb.programmable_move_call(
+            MOVE_STDLIB_PACKAGE_ID,
+            STD_OPTION_MODULE_NAME.into(),
+            ident_str!("none").into(),
+            vec![TypeTag::U64],
+            vec![],
+        );
+        let controllers_to_add = ptb.programmable_move_call(
+            IOTA_FRAMEWORK_PACKAGE_ID,
+            ident_str!("vec_map").into(),
+            ident_str!("empty").into(),
+            vec![TypeTag::Address, TypeTag::U64],
+            vec![],
+        );
+        let controllers_to_remove = ptb
+            .pure(vec![self.controller_cap_id])
+            .map_err(|e| RebasedIdentityError::InvalidArgument(e.to_string()))?;
+        let controllers_to_update = ptb.programmable_move_call(
+            IOTA_FRAMEWORK_PACKAGE_ID,
+            ident_str!("vec_map").into(),
+            ident_str!("empty").into(),
+            vec![
+                TypeTag::from_str("0x2::object::ID").expect("valid object id type tag"),
+                TypeTag::U64,
+            ],
             vec![],
         );
         let Argument::Result(borrow_result) = ptb.programmable_move_call(
@@ -115,9 +135,17 @@ impl Transaction for DestroyIdentityTx {
         ptb.programmable_move_call(
             client.package_id(),
             ident_str!("identity").into(),
-            ident_str!("propose_deletion").into(),
+            ident_str!("propose_config_change").into(),
             vec![],
-            vec![identity, delegation_token, expiration, clock],
+            vec![
+                identity,
+                delegation_token,
+                expiration,
+                threshold,
+                controllers_to_add,
+                controllers_to_remove,
+                controllers_to_update,
+            ],
         );
         ptb.programmable_move_call(
             client.package_id(),

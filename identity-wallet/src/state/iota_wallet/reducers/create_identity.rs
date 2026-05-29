@@ -50,38 +50,49 @@ const GAS_STATION_ATTEMPT_TIMEOUT: Duration = Duration::from_secs(45);
 #[derive(Clone, Copy)]
 pub(crate) struct IotaGasStation {
     pub url: &'static str,
+    pub token: &'static str,
 }
 
 struct IotaGasStationConfig {
     gas_station_1_url: &'static str,
+    gas_station_1_token: &'static str,
     gas_station_2_url: &'static str,
+    gas_station_2_token: &'static str,
 }
 
 const GAS_STATION_TESTNET: IotaGasStationConfig = IotaGasStationConfig {
     gas_station_1_url: "https://gas1.objectid.io",
+    gas_station_1_token: "1111",
     gas_station_2_url: "https://gas2.objectid.io",
+    gas_station_2_token: "1111",
 };
 
 const GAS_STATION_MAINNET: IotaGasStationConfig = IotaGasStationConfig {
     gas_station_1_url: "https://m-gas1.objectid.io",
+    gas_station_1_token: "1111",
     gas_station_2_url: "https://m-gas2.objectid.io",
+    gas_station_2_token: "1111",
 };
 
 pub(crate) fn gas_stations_for_network(network: IotaNetwork) -> &'static [IotaGasStation; 2] {
     const TESTNET_GAS_STATIONS: [IotaGasStation; 2] = [
         IotaGasStation {
             url: GAS_STATION_TESTNET.gas_station_1_url,
+            token: GAS_STATION_TESTNET.gas_station_1_token,
         },
         IotaGasStation {
             url: GAS_STATION_TESTNET.gas_station_2_url,
+            token: GAS_STATION_TESTNET.gas_station_2_token,
         },
     ];
     const MAINNET_GAS_STATIONS: [IotaGasStation; 2] = [
         IotaGasStation {
             url: GAS_STATION_MAINNET.gas_station_1_url,
+            token: GAS_STATION_MAINNET.gas_station_1_token,
         },
         IotaGasStation {
             url: GAS_STATION_MAINNET.gas_station_2_url,
+            token: GAS_STATION_MAINNET.gas_station_2_token,
         },
     ];
 
@@ -274,7 +285,7 @@ where
             identity_client,
             gas_station.url,
             &http_client,
-            Some(GasStationOptions::default()),
+            Some(GasStationOptions::default().with_auth_token(gas_station.token)),
         );
 
         match timeout(GAS_STATION_ATTEMPT_TIMEOUT, execution).await {
@@ -324,7 +335,7 @@ pub(crate) async fn update_did_document_with_gas_station(
             identity_client,
             gas_station.url,
             &http_client,
-            Some(GasStationOptions::default()),
+            Some(GasStationOptions::default().with_auth_token(gas_station.token)),
         );
 
         match timeout(GAS_STATION_ATTEMPT_TIMEOUT, execution).await {

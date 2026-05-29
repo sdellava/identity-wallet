@@ -1,6 +1,10 @@
 use crate::error::AppError;
 use crate::persistence::save_state;
 use crate::state::actions::Action;
+use crate::state::iota_wallet::actions::{
+    create_identity::CreateIotaIdentity, destroy_identity::DestroyIotaIdentity,
+    rotate_identity_keys::RotateIotaIdentityKeys, sign_prepared_transaction::SignPreparedIotaTransaction,
+};
 use crate::state::{AppState, AppStateContainer};
 use futures::StreamExt;
 use itertools::Itertools;
@@ -40,11 +44,24 @@ pub(crate) async fn reduce(state: AppState, action: Action) -> Result<AppState, 
 }
 
 // This value is based on an estimated guess. Can be adjusted in case lower/higher timeouts are desired.
-const TIMEOUT_SECS: u64 = 10;
+const DEFAULT_TIMEOUT_SECS: u64 = 10;
+const IOTA_TRANSACTION_TIMEOUT_SECS: u64 = 120;
+
+fn timeout_secs_for_action(action: &Action) -> u64 {
+    if action.is::<CreateIotaIdentity>()
+        || action.is::<RotateIotaIdentityKeys>()
+        || action.is::<DestroyIotaIdentity>()
+        || action.is::<SignPreparedIotaTransaction>()
+    {
+        IOTA_TRANSACTION_TIMEOUT_SECS
+    } else {
+        DEFAULT_TIMEOUT_SECS
+    }
+}
 
 /// This function is used to prevent deadlocks in the backend. It will sleep for a certain amount of time and then return.
-async fn await_timeout() {
-    tokio::time::sleep(Duration::from_secs(TIMEOUT_SECS)).await;
+async fn await_timeout(timeout_secs: u64) {
+    tokio::time::sleep(Duration::from_secs(timeout_secs)).await;
 }
 
 /// This command handler is the single point of entry to the business logic in the backend. It will delegate the
@@ -96,12 +113,13 @@ pub async fn handle_action(
     container: tauri::State<'_, AppStateContainer>,
     window: tauri::Window<Runtime>,
 ) -> Result<(), String> {
+    let timeout_secs = timeout_secs_for_action(&action);
     tokio::select! {
         res = main_exec(action, app_handle, container, window.clone()) => {
             debug!("Finish invoke");
             res
         }
-        _ = await_timeout() => {
+        _ = await_timeout(timeout_secs) => {
             error!("Operation timed out");
             emit_error(&window, "Operation timed out".to_string()).ok();
             Err("Operation timed out".to_string())

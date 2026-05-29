@@ -81,7 +81,7 @@ mod bindings {
             create_identity::CreateIotaIdentity, create_or_load_wallet::CreateOrLoadIotaWallet,
             destroy_identity::DestroyIotaIdentity, request_faucet_funds::RequestIotaFaucetFunds,
             rotate_identity_keys::RotateIotaIdentityKeys, sign_prepared_transaction::SignPreparedIotaTransaction,
-            validate_identity::ValidateIotaIdentity,
+            submit_wallet_login::SubmitWalletLogin, validate_identity::ValidateIotaIdentity,
         },
         profile_settings::actions::{
             create_new::CreateNew, enable_biometrics::EnableBiometrics, set_locale::SetLocale,
@@ -203,5 +203,7 @@ mod bindings {
         DestroyIotaIdentity { payload: DestroyIotaIdentity },
         #[serde(rename = "[IOTA Wallet] Sign prepared transaction")]
         SignPreparedIotaTransaction { payload: SignPreparedIotaTransaction },
+        #[serde(rename = "[IOTA Wallet] Submit wallet login")]
+        SubmitWalletLogin { payload: SubmitWalletLogin },
     }
 }

@@ -4,6 +4,7 @@ use crate::state::actions::Action;
 use crate::state::iota_wallet::actions::{
     create_identity::CreateIotaIdentity, destroy_identity::DestroyIotaIdentity,
     rotate_identity_keys::RotateIotaIdentityKeys, sign_prepared_transaction::SignPreparedIotaTransaction,
+    submit_wallet_login::SubmitWalletLogin,
 };
 use crate::state::{AppState, AppStateContainer};
 use futures::StreamExt;
@@ -52,6 +53,7 @@ fn timeout_secs_for_action(action: &Action) -> u64 {
         || action.is::<RotateIotaIdentityKeys>()
         || action.is::<DestroyIotaIdentity>()
         || action.is::<SignPreparedIotaTransaction>()
+        || action.is::<SubmitWalletLogin>()
     {
         IOTA_TRANSACTION_TIMEOUT_SECS
     } else {

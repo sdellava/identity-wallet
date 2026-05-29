@@ -50,6 +50,18 @@ pub enum CurrentUserPrompt {
         logo_uri: Option<String>,
         options: Vec<String>,
     },
+    #[serde(rename = "wallet-login")]
+    WalletLogin {
+        client_name: String,
+        session_id: String,
+        request_url: String,
+        response_url: String,
+        origin: String,
+        #[ts(optional)]
+        encryption_public_key_x: Option<String>,
+        #[ts(optional)]
+        encryption_public_key_y: Option<String>,
+    },
 }
 
 #[cfg(test)]

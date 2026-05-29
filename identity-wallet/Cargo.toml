@@ -10,6 +10,7 @@ tauri-plugin-fs = { version = "2" }
 tauri-plugin-opener = { version = "2" }
 
 anyhow = "1.0"
+aes-gcm = "0.10"
 async-trait = "0.1"
 base64 = "0.22"
 bcs = "0.1"
@@ -50,7 +51,7 @@ lazy_static = "1.4"
 log.workspace = true
 oauth_tsl.workspace = true
 oid4vc.workspace = true
-p256 = { version = "0.13", features = ["jwk"] }
+p256 = { version = "0.13", features = ["ecdh", "jwk"] }
 reqwest = { version = "0.11", default-features = false, features = [
     "json",
     "rustls-tls",

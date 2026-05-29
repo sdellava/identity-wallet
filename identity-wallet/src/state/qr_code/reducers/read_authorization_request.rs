@@ -12,6 +12,7 @@ use crate::{
         },
         did::validate_linked_verifiable_presentations::validate_linked_verifiable_presentations,
         qr_code::actions::qrcode_scanned::QrCodeScanned,
+        qr_code::reducers::read_wallet_login_request::is_wallet_login_request,
         user_prompt::CurrentUserPrompt,
         AppState,
     },
@@ -36,6 +37,8 @@ pub async fn read_authorization_request(state: AppState, action: Action) -> Resu
     if let Some(qr_code_scanned) = listen::<QrCodeScanned>(action)
         .map(|payload| payload.form_urlencoded)
         .filter(|s| !s.starts_with("openid-credential-offer"))
+        .filter(|s| !is_wallet_login_request(s))
+        .filter(|s| !is_prepared_iota_transaction_request(s))
     {
         let state_guard = state.core_utils.managers.lock().await;
         let stronghold_manager = state_guard
@@ -255,4 +258,17 @@ pub async fn read_authorization_request(state: AppState, action: Action) -> Resu
     }
 
     Ok(state)
+}
+
+fn is_prepared_iota_transaction_request(value: &str) -> bool {
+    ((value.starts_with("https://") || value.starts_with("http://")) && value.contains("/payload/"))
+        || serde_json::from_str::<serde_json::Value>(value)
+            .ok()
+            .and_then(|value| {
+                value
+                    .get("type")
+                    .and_then(|kind| kind.as_str())
+                    .map(ToString::to_string)
+            })
+            .is_some_and(|kind| kind == "iota:prepared-transaction")
 }

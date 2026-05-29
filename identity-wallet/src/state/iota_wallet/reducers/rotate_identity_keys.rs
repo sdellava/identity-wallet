@@ -5,7 +5,10 @@ use crate::{
         iota_wallet::{
             actions::rotate_identity_keys::RotateIotaIdentityKeys,
             reducers::{
-                create_identity::{identity_client_for_wallet, update_did_document_with_gas_station},
+                create_identity::{
+                    identity_client_for_wallet, replace_identity_document_controller_key,
+                    update_did_document_with_gas_station,
+                },
                 create_or_load_wallet::{load_stored_wallet, save_stored_wallet},
             },
             IotaWalletState,
@@ -14,13 +17,7 @@ use crate::{
     },
 };
 
-use identity_iota::{
-    core::Timestamp,
-    did::DIDUrl,
-    iota::IotaDID,
-    verification::{jws::JwsAlgorithm, MethodScope},
-};
-use identity_storage::{JwkDocumentExt, JwkMemStore, KeyIdMemstore, Storage};
+use identity_iota::iota::IotaDID;
 use std::str::FromStr;
 
 pub async fn rotate_identity_keys(state: AppState, action: Action) -> Result<AppState, AppError> {
@@ -47,27 +44,7 @@ pub async fn rotate_identity_keys(state: AppState, action: Action) -> Result<App
         .await
         .map_err(|e| AppError::Error(format!("Failed to resolve DID before key rotation: {e}")))?;
 
-    let method_ids = document
-        .methods(None)
-        .iter()
-        .map(|method| method.id().clone())
-        .collect::<Vec<DIDUrl>>();
-    for method_id in method_ids {
-        document.remove_method(&method_id);
-    }
-
-    let storage = Storage::new(JwkMemStore::new(), KeyIdMemstore::new());
-    document
-        .generate_method(
-            &storage,
-            JwkMemStore::ED25519_KEY_TYPE,
-            JwsAlgorithm::EdDSA,
-            Some("key-0"),
-            MethodScope::VerificationMethod,
-        )
-        .await
-        .map_err(|e| AppError::Error(format!("Failed to generate rotated IOTA identity key: {e}")))?;
-    document.metadata.updated = Some(Timestamp::now_utc());
+    replace_identity_document_controller_key(&mut wallet, &mut document)?;
 
     let document = update_did_document_with_gas_station(&wallet, &identity_client, document)
         .await

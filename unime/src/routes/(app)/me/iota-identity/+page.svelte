@@ -19,6 +19,7 @@
 
   let rotating = false;
   let destroying = false;
+  let loadingDocument = false;
   let showDocument = false;
   let resultTitle = '';
   let resultDescription = '';
@@ -54,6 +55,27 @@
     } else {
       showResult('Identity destroyed', 'The identity controller cap was removed and destroyed successfully.');
     }
+  };
+
+  const toggleDidDocument = async () => {
+    if (showDocument) {
+      showDocument = false;
+      return;
+    }
+
+    loadingDocument = true;
+    await dispatch({ type: '[IOTA Wallet] Validate identity', payload: {} });
+    await tick();
+    loadingDocument = false;
+    if ($state.iota_wallet.last_error) {
+      showResult('DID document refresh failed', $state.iota_wallet.last_error);
+      return;
+    }
+    if ($state.iota_wallet.identity_validation_error) {
+      showResult('DID document refresh failed', $state.iota_wallet.identity_validation_error);
+      return;
+    }
+    showDocument = true;
   };
 
   const openExplorer = async () => {
@@ -115,12 +137,13 @@
         </span>
       </button>
       <button
-        class="flex min-h-24 flex-col items-start justify-between rounded-xl border border-slate-200 bg-white p-4 text-left dark:border-slate-600 dark:bg-dark"
-        onclick={() => (showDocument = !showDocument)}
+        class="flex min-h-24 flex-col items-start justify-between rounded-xl border border-slate-200 bg-white p-4 text-left disabled:opacity-50 dark:border-slate-600 dark:bg-dark"
+        onclick={toggleDidDocument}
+        disabled={loadingDocument}
       >
         <CodeRegularIcon class="size-5 text-primary" />
         <span class="text-[13px]/[18px] font-semibold text-slate-800 dark:text-grey">
-          {showDocument ? 'Hide document' : 'DID document'}
+          {loadingDocument ? 'Loading document' : showDocument ? 'Hide document' : 'DID document'}
         </span>
       </button>
       <button

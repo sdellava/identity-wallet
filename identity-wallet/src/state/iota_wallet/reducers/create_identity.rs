@@ -25,9 +25,12 @@ use identity_iota::{
         },
         IotaKeySignature, OptionalSend,
     },
-    verification::{jws::JwsAlgorithm, MethodScope},
+    verification::{
+        jwk::{EdCurve, Jwk, JwkParamsOkp},
+        jws::JwsAlgorithm,
+        jwu, MethodScope, VerificationMethod,
+    },
 };
-use identity_storage::{JwkDocumentExt, JwkMemStore, KeyIdMemstore, Storage};
 use iota_keys::keystore::{AccountKeystore, InMemKeystore};
 use iota_sdk::{types::crypto::SignatureScheme, IotaClientBuilder};
 use iota_sdk_types::crypto::Intent;
@@ -240,25 +243,113 @@ pub(crate) async fn identity_client_for_wallet(
         .map_err(|e| AppError::Error(format!("Failed to attach IOTA Identity signer: {e}")))
 }
 
-async fn ensure_identity_document_has_controller_and_key(document: &mut IotaDocument) -> Result<(), AppError> {
+fn hex_lower(bytes: &[u8]) -> String {
+    const HEX: &[u8; 16] = b"0123456789abcdef";
+    let mut output = String::with_capacity(bytes.len() * 2);
+    for byte in bytes {
+        output.push(HEX[(byte >> 4) as usize] as char);
+        output.push(HEX[(byte & 0x0f) as usize] as char);
+    }
+    output
+}
+
+fn encode_public_ed25519_jwk(public_key: &[u8]) -> Jwk {
+    let x = jwu::encode_b64(public_key);
+    let mut params = JwkParamsOkp::new();
+    params.x = x;
+    params.d = None;
+    params.crv = EdCurve::Ed25519.name().to_string();
+    let mut jwk = Jwk::from_params(params);
+    jwk.set_alg(JwsAlgorithm::EdDSA.name());
+    jwk
+}
+
+fn generate_identity_controller_jwk(wallet: &mut crate::state::iota_wallet::StoredIotaWallet) -> Result<Jwk, AppError> {
+    let mut keystore = InMemKeystore::default();
+    let (address, _, _) = keystore
+        .generate_and_add_new_key(
+            SignatureScheme::ED25519,
+            Some("unime-iota-identity-controller".to_string()),
+            None,
+            Some("word24".to_string()),
+        )
+        .map_err(|e| AppError::Error(format!("Failed to generate IOTA identity controller key: {e}")))?;
+    let key_pair = keystore
+        .get_key(&address)
+        .and_then(|key| key.as_keypair())
+        .map_err(|e| AppError::Error(format!("Failed to read generated IOTA identity controller key: {e}")))?;
+    let private_key_hex = hex_lower(&key_pair.to_bytes_no_flag());
+    let jwk = encode_public_ed25519_jwk(key_pair.public().as_ref());
+    let public_jwk = serde_json::to_string(&jwk)
+        .map_err(|e| AppError::Error(format!("Failed to serialize IOTA identity controller public key: {e}")))?;
+
+    wallet.identity_controller_private_key = Some(private_key_hex);
+    wallet.identity_controller_public_jwk = Some(public_jwk);
+
+    Ok(jwk)
+}
+
+fn identity_controller_jwk(
+    wallet: &mut crate::state::iota_wallet::StoredIotaWallet,
+    force_new: bool,
+) -> Result<Jwk, AppError> {
+    if !force_new {
+        if let (Some(_private_key), Some(public_jwk)) = (
+            wallet.identity_controller_private_key.as_ref(),
+            wallet.identity_controller_public_jwk.as_ref(),
+        ) {
+            if let Ok(jwk) = serde_json::from_str::<Jwk>(public_jwk) {
+                return Ok(jwk);
+            }
+        }
+    }
+
+    generate_identity_controller_jwk(wallet)
+}
+
+fn insert_identity_controller_method(
+    wallet: &mut crate::state::iota_wallet::StoredIotaWallet,
+    document: &mut IotaDocument,
+    force_new_key: bool,
+) -> Result<(), AppError> {
+    let jwk = identity_controller_jwk(wallet, force_new_key)?;
+    let method = VerificationMethod::new_from_jwk(document.id().clone(), jwk, Some("key-0"))
+        .map_err(|e| AppError::Error(format!("Failed to create IOTA identity verification method: {e}")))?;
+    document
+        .insert_method(method, MethodScope::VerificationMethod)
+        .map_err(|e| AppError::Error(format!("Failed to attach IOTA identity controller key: {e}")))
+}
+
+pub(crate) fn ensure_identity_document_has_controller_and_key(
+    wallet: &mut crate::state::iota_wallet::StoredIotaWallet,
+    document: &mut IotaDocument,
+) -> Result<(), AppError> {
     if document.controller().next().is_none() {
         document.set_controller([document.id().clone()]);
     }
 
     if document.methods(Some(MethodScope::VerificationMethod)).is_empty() {
-        let storage = Storage::new(JwkMemStore::new(), KeyIdMemstore::new());
-        document
-            .generate_method(
-                &storage,
-                JwkMemStore::ED25519_KEY_TYPE,
-                JwsAlgorithm::EdDSA,
-                Some("key-0"),
-                MethodScope::VerificationMethod,
-            )
-            .await
-            .map_err(|e| AppError::Error(format!("Failed to generate IOTA identity key: {e}")))?;
+        insert_identity_controller_method(wallet, document, false)?;
     }
 
+    document.metadata.updated = Some(Timestamp::now_utc());
+    Ok(())
+}
+
+pub(crate) fn replace_identity_document_controller_key(
+    wallet: &mut crate::state::iota_wallet::StoredIotaWallet,
+    document: &mut IotaDocument,
+) -> Result<(), AppError> {
+    let method_ids = document
+        .methods(None)
+        .iter()
+        .map(|method| method.id().clone())
+        .collect::<Vec<_>>();
+    for method_id in method_ids {
+        document.remove_method(&method_id);
+    }
+
+    insert_identity_controller_method(wallet, document, true)?;
     document.metadata.updated = Some(Timestamp::now_utc());
     Ok(())
 }
@@ -383,7 +474,7 @@ pub async fn create_identity(state: AppState, action: Action) -> Result<AppState
         let did = IotaDID::parse(did).map_err(|e| AppError::Error(format!("Stored IOTA DID is invalid: {e}")))?;
         match identity_client.resolve_did(&did).await {
             Ok(mut document) => {
-                ensure_identity_document_has_controller_and_key(&mut document).await?;
+                ensure_identity_document_has_controller_and_key(&mut wallet, &mut document)?;
                 match update_did_document_with_gas_station(&wallet, &identity_client, document).await {
                     Ok(document) => document,
                     Err(e) => {
@@ -414,7 +505,7 @@ pub async fn create_identity(state: AppState, action: Action) -> Result<AppState
     };
 
     if wallet.did.is_none() {
-        ensure_identity_document_has_controller_and_key(&mut document).await?;
+        ensure_identity_document_has_controller_and_key(&mut wallet, &mut document)?;
         document = match execute_with_wallet_gas_station(&wallet, &identity_client, || async {
             Ok(identity_client.publish_did_document(document.clone()))
         })

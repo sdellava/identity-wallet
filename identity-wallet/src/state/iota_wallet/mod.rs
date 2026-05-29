@@ -48,6 +48,10 @@ pub(crate) struct StoredIotaWallet {
     pub address: String,
     pub public_key: Option<String>,
     #[serde(default)]
+    pub identity_controller_private_key: Option<String>,
+    #[serde(default)]
+    pub identity_controller_public_jwk: Option<String>,
+    #[serde(default)]
     pub network: IotaNetwork,
     pub did: Option<String>,
     pub did_network: Option<IotaNetwork>,

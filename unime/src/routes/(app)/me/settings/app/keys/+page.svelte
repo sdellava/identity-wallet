@@ -6,11 +6,9 @@
   type IotaNetwork = 'testnet' | 'mainnet';
 
   let selectedNetwork: IotaNetwork = $state.iota_wallet.network ?? 'testnet';
-  let showSeed = false;
 
   $: if ($state.iota_wallet.network && $state.iota_wallet.network !== selectedNetwork) {
     selectedNetwork = $state.iota_wallet.network;
-    showSeed = false;
   }
 
   const loadWallet = (network: IotaNetwork = selectedNetwork) =>
@@ -18,7 +16,6 @@
 
   const changeNetwork = (network: IotaNetwork) => {
     selectedNetwork = network;
-    showSeed = false;
     loadWallet(network);
   };
 </script>
@@ -56,12 +53,14 @@
           Create or load the IOTA key stored in this wallet.
         </p>
       </div>
-      <button
-        class="rounded-lg bg-primary px-3 py-2 text-[12px]/[16px] font-semibold text-white dark:text-dark"
-        on:click={() => loadWallet()}
-      >
-        {$state.iota_wallet.address ? 'Reload' : 'Create'}
-      </button>
+      {#if !$state.iota_wallet.address}
+        <button
+          class="rounded-lg bg-primary px-3 py-2 text-[12px]/[16px] font-semibold text-white dark:text-dark"
+          on:click={() => loadWallet()}
+        >
+          Create
+        </button>
+      {/if}
     </div>
 
     <div class="mt-4 flex flex-col gap-3">
@@ -78,25 +77,6 @@
           <p class="font-mono text-[11px]/[16px] break-all text-slate-800 dark:text-grey">
             {$state.iota_wallet.public_key}
           </p>
-        </div>
-      {/if}
-
-      {#if selectedNetwork === 'testnet' && $state.iota_wallet.seed_phrase}
-        <div>
-          <div class="flex items-center justify-between gap-3">
-            <p class="text-[12px]/[18px] font-medium text-slate-500 dark:text-slate-300">Seed phrase</p>
-            <button
-              class="rounded-lg border border-slate-200 px-3 py-1 text-[11px]/[16px] font-semibold text-slate-700 dark:border-slate-600 dark:text-grey"
-              on:click={() => (showSeed = !showSeed)}
-            >
-              {showSeed ? 'Hide' : 'Show'}
-            </button>
-          </div>
-          {#if showSeed}
-            <p class="mt-2 font-mono text-[11px]/[16px] break-all text-slate-800 dark:text-grey">
-              {$state.iota_wallet.seed_phrase}
-            </p>
-          {/if}
         </div>
       {/if}
     </div>

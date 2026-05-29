@@ -224,6 +224,8 @@ pub async fn destroy_identity(state: AppState, action: Action) -> Result<AppStat
     wallet.did_network = None;
     wallet.did_document = None;
     wallet.identity_controller_cap = None;
+    wallet.identity_controller_private_key = None;
+    wallet.identity_controller_public_jwk = None;
     save_stored_wallet(&state, &wallet).await?;
 
     Ok(AppState {

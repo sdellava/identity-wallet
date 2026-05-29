@@ -52,6 +52,8 @@ pub async fn create_or_load_wallet(state: AppState, action: Action) -> Result<Ap
                 mnemonic,
                 address: address.to_string(),
                 public_key: Some(public_key),
+                identity_controller_private_key: None,
+                identity_controller_public_jwk: None,
                 network: payload.network,
                 did: None,
                 did_network: None,

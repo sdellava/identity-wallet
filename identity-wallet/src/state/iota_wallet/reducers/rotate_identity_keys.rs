@@ -6,7 +6,7 @@ use crate::{
             actions::rotate_identity_keys::RotateIotaIdentityKeys,
             reducers::{
                 create_or_load_wallet::{load_stored_wallet, save_stored_wallet},
-                publish_did::{identity_client_for_wallet, publish_did_document_update_with_gas_station},
+                create_identity::{identity_client_for_wallet, update_did_document_with_gas_station},
             },
             IotaWalletState,
         },
@@ -69,7 +69,7 @@ pub async fn rotate_identity_keys(state: AppState, action: Action) -> Result<App
         .map_err(|e| AppError::Error(format!("Failed to generate rotated IOTA identity key: {e}")))?;
     document.metadata.updated = Some(Timestamp::now_utc());
 
-    let document = publish_did_document_update_with_gas_station(&wallet, &identity_client, document)
+    let document = update_did_document_with_gas_station(&wallet, &identity_client, document)
         .await
         .map_err(|e| AppError::Error(format!("Failed to publish rotated IOTA identity keys: {e}")))?;
 

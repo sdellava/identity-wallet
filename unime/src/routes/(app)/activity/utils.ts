@@ -25,6 +25,8 @@ export const groupConnectionsAlphabetically = (connections: Connection[]): Map<s
 export const buildIotaExplorerSearchLink = (did: string): string => {
   const explorerMapping: Record<string, string> = {
     'did:iota': 'mainnet',
+    'did:iota:mainnet': 'mainnet',
+    'did:iota:testnet': 'testnet',
     'did:iota:smr': 'shimmer',
     'did:iota:rms': 'testnet',
   };
@@ -34,5 +36,5 @@ export const buildIotaExplorerSearchLink = (did: string): string => {
   parts.pop();
   const network = parts.join(':');
 
-  return `https://explorer.iota.org/${explorerMapping[network]}/search/${did}`;
+  return `https://explorer.iota.org/${explorerMapping[network] ?? 'testnet'}/search/${did}`;
 };

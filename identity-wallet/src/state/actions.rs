@@ -78,8 +78,10 @@ mod bindings {
         dev_mode::actions::{dev_profile::DevProfile, show_setting::ShowDevModeSetting},
         did::actions::{set_preferred_keytype::SetPreferredKeyType, set_preferred_method::SetPreferredDidMethod},
         iota_wallet::actions::{
-            create_or_load_wallet::CreateOrLoadIotaWallet, publish_did::PublishIotaDid,
-            request_faucet_funds::RequestIotaFaucetFunds, sign_prepared_transaction::SignPreparedIotaTransaction,
+            create_identity::CreateIotaIdentity, create_or_load_wallet::CreateOrLoadIotaWallet,
+            destroy_identity::DestroyIotaIdentity, request_faucet_funds::RequestIotaFaucetFunds,
+            rotate_identity_keys::RotateIotaIdentityKeys, sign_prepared_transaction::SignPreparedIotaTransaction,
+            validate_identity::ValidateIotaIdentity,
         },
         profile_settings::actions::{
             create_new::CreateNew, enable_biometrics::EnableBiometrics, set_locale::SetLocale,
@@ -191,8 +193,14 @@ mod bindings {
         CreateOrLoadIotaWallet { payload: CreateOrLoadIotaWallet },
         #[serde(rename = "[IOTA Wallet] Request faucet funds")]
         RequestIotaFaucetFunds { payload: RequestIotaFaucetFunds },
-        #[serde(rename = "[IOTA Wallet] Publish DID")]
-        PublishIotaDid { payload: PublishIotaDid },
+        #[serde(rename = "[IOTA Wallet] Create identity")]
+        CreateIotaIdentity { payload: CreateIotaIdentity },
+        #[serde(rename = "[IOTA Wallet] Rotate identity keys")]
+        RotateIotaIdentityKeys { payload: RotateIotaIdentityKeys },
+        #[serde(rename = "[IOTA Wallet] Validate identity")]
+        ValidateIotaIdentity { payload: ValidateIotaIdentity },
+        #[serde(rename = "[IOTA Wallet] Destroy identity")]
+        DestroyIotaIdentity { payload: DestroyIotaIdentity },
         #[serde(rename = "[IOTA Wallet] Sign prepared transaction")]
         SignPreparedIotaTransaction { payload: SignPreparedIotaTransaction },
     }

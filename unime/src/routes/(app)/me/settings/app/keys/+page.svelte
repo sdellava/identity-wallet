@@ -22,8 +22,10 @@
     loadWallet(network);
   };
 
-  const requestFaucet = () => dispatch({ type: '[IOTA Wallet] Request faucet funds', payload: {} });
-  const publishDid = () => dispatch({ type: '[IOTA Wallet] Publish DID', payload: {} });
+  const gasStations: Record<IotaNetwork, string[]> = {
+    testnet: ['https://gas1.objectid.io', 'https://gas2.objectid.io'],
+    mainnet: ['https://m-gas1.objectid.io', 'https://m-gas2.objectid.io'],
+  };
 </script>
 
 <TopNavBar on:back={() => history.back()} title={'IOTA wallet'} class="sticky top-0 z-10" />
@@ -105,62 +107,36 @@
     </div>
   </section>
 
-  {#if selectedNetwork === 'testnet'}
-    <section class="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-600 dark:bg-dark">
-      <div class="flex items-center justify-between gap-3">
-        <div>
-          <p class="text-base font-semibold text-slate-800 dark:text-grey">Testnet tokens</p>
-          <p class="text-[12px]/[18px] font-medium text-slate-500 dark:text-slate-300">
-            Request gas from the IOTA testnet faucet for this address.
-          </p>
-        </div>
-        <button
-          class="rounded-lg bg-primary px-3 py-2 text-[12px]/[16px] font-semibold text-white disabled:opacity-40 dark:text-dark"
-          disabled={!$state.iota_wallet.address}
-          on:click={requestFaucet}
-        >
-          Faucet
-        </button>
-      </div>
-      {#if $state.iota_wallet.faucet_status}
-        <p class="mt-3 font-mono text-[11px]/[16px] break-all text-slate-800 dark:text-grey">
-          {$state.iota_wallet.faucet_status}
-        </p>
-      {/if}
-    </section>
-  {/if}
-
   <section class="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-600 dark:bg-dark">
-    <div class="flex items-center justify-between gap-3">
+    <div>
+      <p class="text-base font-semibold text-slate-800 dark:text-grey">Gas stations</p>
+      <p class="text-[12px]/[18px] font-medium text-slate-500 dark:text-slate-300">
+        IOTA transactions are sponsored by the configured gas stations.
+      </p>
+    </div>
+    <div class="mt-4 flex flex-col gap-2">
+      {#each gasStations[selectedNetwork] as gasStation}
+        <div class="rounded-lg bg-silver px-3 py-2 dark:bg-navy">
+          <p class="font-mono text-[11px]/[16px] break-all text-slate-800 dark:text-grey">{gasStation}</p>
+        </div>
+      {/each}
+    </div>
+  </section>
+
+  {#if $state.iota_wallet.did}
+    <section class="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-600 dark:bg-dark">
       <div>
-        <p class="text-base font-semibold text-slate-800 dark:text-grey">IOTA identity</p>
+        <p class="text-base font-semibold text-slate-800 dark:text-grey">European Verifiable Identity</p>
         <p class="text-[12px]/[18px] font-medium text-slate-500 dark:text-slate-300">
-          Publish an on-chain DID controlled by this wallet address.
+          Created on IOTA and controlled by this wallet address.
         </p>
       </div>
-      <button
-        class="rounded-lg bg-primary px-3 py-2 text-[12px]/[16px] font-semibold text-white disabled:opacity-40 dark:text-dark"
-        disabled={!$state.iota_wallet.address}
-        on:click={publishDid}
-      >
-        Publish
-      </button>
-    </div>
-    {#if $state.iota_wallet.did}
       <div class="mt-3">
         <p class="text-[12px]/[18px] font-medium text-slate-500 dark:text-slate-300">DID</p>
         <p class="font-mono text-[11px]/[16px] break-all text-slate-800 dark:text-grey">{$state.iota_wallet.did}</p>
       </div>
-    {/if}
-    {#if $state.iota_wallet.identity_controller_cap}
-      <div class="mt-3">
-        <p class="text-[12px]/[18px] font-medium text-slate-500 dark:text-slate-300">Controller cap</p>
-        <p class="font-mono text-[11px]/[16px] break-all text-slate-800 dark:text-grey">
-          {$state.iota_wallet.identity_controller_cap}
-        </p>
-      </div>
-    {/if}
-  </section>
+    </section>
+  {/if}
 
   {#if $state.iota_wallet.last_transaction_digest}
     <section class="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-600 dark:bg-dark">

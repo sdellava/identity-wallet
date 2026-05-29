@@ -6,7 +6,7 @@ use crate::{
             actions::destroy_identity::DestroyIotaIdentity,
             reducers::{
                 create_or_load_wallet::{load_stored_wallet, save_stored_wallet},
-                publish_did::{execute_with_wallet_gas_station, identity_client_for_wallet},
+                create_identity::{execute_with_wallet_gas_station, identity_client_for_wallet},
             },
             IotaWalletState,
         },
@@ -183,11 +183,11 @@ pub async fn destroy_identity(state: AppState, action: Action) -> Result<AppStat
     let controller_cap_id = ObjectID::from_str(&controller_cap_id)
         .map_err(|e| AppError::Error(format!("Stored IOTA controller cap is invalid: {e}")))?;
 
-    execute_with_wallet_gas_station(&wallet, &identity_client, || {
-        TransactionBuilder::new(DestroyIdentityTx {
+    execute_with_wallet_gas_station(&wallet, &identity_client, || async {
+        Ok(TransactionBuilder::new(DestroyIdentityTx {
             identity_id,
             controller_cap_id,
-        })
+        }))
     })
     .await
     .map_err(|e| AppError::Error(format!("Failed to destroy identity controller cap: {e}")))?;

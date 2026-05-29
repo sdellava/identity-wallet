@@ -6,7 +6,7 @@ use crate::{
             actions::sign_prepared_transaction::SignPreparedIotaTransaction,
             reducers::{
                 create_or_load_wallet::load_stored_wallet,
-                publish_did::{gas_stations_for_network, IotaGasStation},
+                create_identity::{gas_stations_for_network, IotaGasStation},
             },
             IotaWalletState,
         },
@@ -255,7 +255,6 @@ async fn execute_prepared_transaction_with_one_gas_station(
         .map_err(|e| AppError::Error(format!("Failed to encode sponsored IOTA transaction: {e}")))?;
     let response = http_client
         .post(format!("{}/v1/execute_tx", gas_station.url.trim_end_matches('/')))
-        .bearer_auth(gas_station.token)
         .json(&ExecuteSponsoredTxRequest {
             reservation_id: reservation.reservation_id,
             tx_bytes: STANDARD.encode(tx_bytes),
@@ -297,7 +296,6 @@ async fn reserve_gas(
 ) -> Result<ReserveGasResult, AppError> {
     let response = http_client
         .post(format!("{}/v1/reserve_gas", gas_station.url.trim_end_matches('/')))
-        .bearer_auth(gas_station.token)
         .json(&ReserveGasRequest {
             gas_budget,
             reserve_duration_secs: GAS_RESERVATION_DURATION_SECS,

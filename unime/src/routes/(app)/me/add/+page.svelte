@@ -54,13 +54,16 @@
       return;
     }
 
-    creatingIdentity = true;
-    await dispatch({
-      type: '[IOTA Wallet] Create or load',
-      payload: { network: $appState.iota_wallet.network ?? 'testnet' },
-    });
-    await dispatch({ type: '[IOTA Wallet] Create identity', payload: {} });
-    creatingIdentity = false;
+    try {
+      creatingIdentity = true;
+      await dispatch({
+        type: '[IOTA Wallet] Create or load',
+        payload: { network: $appState.iota_wallet.network ?? 'testnet' },
+      });
+      await dispatch({ type: '[IOTA Wallet] Create identity', payload: {} });
+    } finally {
+      creatingIdentity = false;
+    }
   };
 </script>
 

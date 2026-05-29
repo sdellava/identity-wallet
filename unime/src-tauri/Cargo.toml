@@ -27,6 +27,7 @@ jni = "0.21"
 log.workspace = true
 rustls.workspace = true
 rustls-platform-verifier.workspace = true
+rustls-platform-verifier-05 = { package = "rustls-platform-verifier", version = "0.5.3" }
 serde_json.workspace = true
 tauri-plugin-barcode-scanner = { version = "2" }
 tauri-plugin-deep-link = { version = "2" }

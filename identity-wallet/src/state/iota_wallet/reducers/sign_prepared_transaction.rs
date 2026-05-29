@@ -5,8 +5,8 @@ use crate::{
         iota_wallet::{
             actions::sign_prepared_transaction::SignPreparedIotaTransaction,
             reducers::{
-                create_or_load_wallet::load_stored_wallet,
                 create_identity::{gas_stations_for_network, IotaGasStation},
+                create_or_load_wallet::load_stored_wallet,
             },
             IotaWalletState,
         },

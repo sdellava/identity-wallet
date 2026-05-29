@@ -5,8 +5,8 @@ use crate::{
         iota_wallet::{
             actions::rotate_identity_keys::RotateIotaIdentityKeys,
             reducers::{
-                create_or_load_wallet::{load_stored_wallet, save_stored_wallet},
                 create_identity::{identity_client_for_wallet, update_did_document_with_gas_station},
+                create_or_load_wallet::{load_stored_wallet, save_stored_wallet},
             },
             IotaWalletState,
         },

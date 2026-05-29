@@ -21,11 +21,6 @@
     showSeed = false;
     loadWallet(network);
   };
-
-  const gasStations: Record<IotaNetwork, string[]> = {
-    testnet: ['https://gas1.objectid.io', 'https://gas2.objectid.io'],
-    mainnet: ['https://m-gas1.objectid.io', 'https://m-gas2.objectid.io'],
-  };
 </script>
 
 <TopNavBar on:back={() => history.back()} title={'IOTA wallet'} class="sticky top-0 z-10" />
@@ -104,22 +99,6 @@
           {/if}
         </div>
       {/if}
-    </div>
-  </section>
-
-  <section class="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-600 dark:bg-dark">
-    <div>
-      <p class="text-base font-semibold text-slate-800 dark:text-grey">Gas stations</p>
-      <p class="text-[12px]/[18px] font-medium text-slate-500 dark:text-slate-300">
-        IOTA transactions are sponsored by the configured gas stations.
-      </p>
-    </div>
-    <div class="mt-4 flex flex-col gap-2">
-      {#each gasStations[selectedNetwork] as gasStation}
-        <div class="rounded-lg bg-silver px-3 py-2 dark:bg-navy">
-          <p class="font-mono text-[11px]/[16px] break-all text-slate-800 dark:text-grey">{gasStation}</p>
-        </div>
-      {/each}
     </div>
   </section>
 

@@ -42,8 +42,10 @@ use product_common::{
 use secret_storage::{Error as SecretStorageError, Signer};
 use std::future::Future;
 use std::time::Duration;
+use tokio::time::timeout;
 
 const IOTA_IDENTITY_GAS_BUDGET: u64 = 50_000_000;
+const GAS_STATION_ATTEMPT_TIMEOUT: Duration = Duration::from_secs(45);
 
 #[derive(Clone, Copy)]
 pub(crate) struct IotaGasStation {
@@ -268,17 +270,17 @@ where
             .await
             .map_err(|e| AppError::Error(format!("Failed to prepare IOTA transaction: {e}")))?
             .with_gas_budget(IOTA_IDENTITY_GAS_BUDGET);
-        match transaction
-            .execute_with_gas_station(
-                identity_client,
-                gas_station.url,
-                &http_client,
-                Some(GasStationOptions::default()),
-            )
-            .await
-        {
-            Ok(output) => return Ok(output),
-            Err(error) => last_error = Some(format!("{} failed: {error}", gas_station.url)),
+        let execution = transaction.execute_with_gas_station(
+            identity_client,
+            gas_station.url,
+            &http_client,
+            Some(GasStationOptions::default()),
+        );
+
+        match timeout(GAS_STATION_ATTEMPT_TIMEOUT, execution).await {
+            Ok(Ok(output)) => return Ok(output),
+            Ok(Err(error)) => last_error = Some(format!("{} failed: {error}", gas_station.url)),
+            Err(_) => last_error = Some(format!("{} timed out", gas_station.url)),
         }
     }
 
@@ -318,17 +320,17 @@ pub(crate) async fn update_did_document_with_gas_station(
             .map_err(|e| AppError::Error(format!("Failed to prepare DID document update: {e}")))
             .map(|transaction| transaction.with_gas_budget(IOTA_IDENTITY_GAS_BUDGET))?;
 
-        match transaction
-            .execute_with_gas_station(
-                identity_client,
-                gas_station.url,
-                &http_client,
-                Some(GasStationOptions::default()),
-            )
-            .await
-        {
-            Ok(_) => return Ok(document),
-            Err(error) => last_error = Some(format!("{} failed: {error}", gas_station.url)),
+        let execution = transaction.execute_with_gas_station(
+            identity_client,
+            gas_station.url,
+            &http_client,
+            Some(GasStationOptions::default()),
+        );
+
+        match timeout(GAS_STATION_ATTEMPT_TIMEOUT, execution).await {
+            Ok(Ok(_)) => return Ok(document),
+            Ok(Err(error)) => last_error = Some(format!("{} failed: {error}", gas_station.url)),
+            Err(_) => last_error = Some(format!("{} timed out", gas_station.url)),
         }
     }
 

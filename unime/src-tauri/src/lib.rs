@@ -90,6 +90,12 @@ pub extern "C" fn Java_com_impierce_identity_1wallet_MainActivity_java_1init(
     _class: JClass,
     context: JObject,
 ) {
-    rustls_platform_verifier::android::init_hosted(&mut env, context)
+    let context_for_current_verifier = env
+        .new_local_ref(&context)
+        .expect("Failed to create Android context local reference");
+
+    rustls_platform_verifier::android::init_hosted(&mut env, context_for_current_verifier)
         .expect("Failed to initialize Android platform verifier");
+    rustls_platform_verifier_05::android::init_hosted(&mut env, context)
+        .expect("Failed to initialize Android platform verifier 0.5");
 }

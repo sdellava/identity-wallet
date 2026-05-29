@@ -5,8 +5,8 @@ use crate::{
         iota_wallet::{
             actions::destroy_identity::DestroyIotaIdentity,
             reducers::{
-                create_or_load_wallet::{load_stored_wallet, save_stored_wallet},
                 create_identity::{execute_with_wallet_gas_station, identity_client_for_wallet},
+                create_or_load_wallet::{load_stored_wallet, save_stored_wallet},
             },
             IotaWalletState,
         },

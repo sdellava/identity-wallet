@@ -5508,6 +5508,7 @@ dependencies = [
  "identity_eddsa_verifier",
  "identity_iota",
  "identity_jose",
+ "identity_storage",
  "iota-keys",
  "iota-sdk 1.22.0-alpha",
  "iota-sdk-types",
@@ -5520,6 +5521,7 @@ dependencies = [
  "oauth_tsl",
  "oid4vc",
  "p256 0.13.2",
+ "product_common",
  "reqwest 0.11.27",
  "rustls 0.23.31",
  "rustls-platform-verifier 0.6.1",
@@ -5756,13 +5758,16 @@ dependencies = [
  "identity_document",
  "identity_iota_core",
  "identity_verification",
+ "iota-crypto",
  "iota-sdk-types",
  "iota_interaction",
+ "rand 0.8.5",
  "seahash",
  "secret-storage",
  "serde",
  "serde_json",
  "thiserror 1.0.69",
+ "tokio",
 ]
 
 [[package]]
@@ -10453,6 +10458,7 @@ dependencies = [
  "thiserror 1.0.69",
  "tokio",
  "toml 0.8.23",
+ "url",
 ]
 
 [[package]]
